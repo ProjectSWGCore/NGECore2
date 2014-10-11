@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -943,11 +944,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
+			Vector<Equipment> removeVector = new Vector<Equipment>();
 			for (Equipment equipment : getEquipmentList()) {
 				if (equipment.getObjectId() == object.getObjectID()) {
-					getEquipmentList().remove(equipment);
+					//getEquipmentList().remove(equipment);
+					removeVector.add(equipment);
 				}
 			}
+			getEquipmentList().removeAll(removeVector);
 		}
 	}
 	
@@ -1175,11 +1179,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
+			Vector<Equipment> removeVector = new Vector<Equipment>();
 			for (Equipment equipment : getAppearanceEquipmentList()) {
 				if (equipment.getObjectId() == object.getObjectID()) {
-					getAppearanceEquipmentList().remove(equipment);
+					removeVector.add(equipment);
+					//getAppearanceEquipmentList().remove(equipment);
 				}
 			}
+			getAppearanceEquipmentList().removeAll(removeVector);
 		}
 	}
 	
