@@ -801,6 +801,9 @@ public class PlayerService implements INetworkDispatch {
 		SWGObject inventory = creature.getSlottedObject("inventory");
 		SWGObject appearance = creature.getSlottedObject("appearance_inventory");
 		
+		if (appearance==null)
+			System.err.println("Apearance inventory is null");
+		
 		if (unequipItems) {
 			try {
 				String[] slots = { "hat", "earring_r", "earring_l", "eyes", "mouth", "neck", "cloak", "back", "chest1", "chest2", "chest3_r", "chest3_l", "bicep_r", "bicep_l", "bracer_lower_r", "bracer_upper_r", "bracer_lower_l", "bracer_upper_l", "wrist_r", "wrist_l", "gloves", "hold_r", "hold_l", "ring_r", "ring_l", "utility_belt", "pants1", "pants2", "shoes" };
