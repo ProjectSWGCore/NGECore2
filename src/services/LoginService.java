@@ -318,6 +318,11 @@ public class LoginService implements INetworkDispatch{
 
 			while (resultSet.next() && !resultSet.isClosed()) {
 				
+				if (core.objectService.getObject(resultSet.getLong("id")) == null) {
+					resultSet.deleteRow();
+					continue;
+				}
+				
 				//TODO: on creation just don't allow spaces in first or last name maybe?
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");

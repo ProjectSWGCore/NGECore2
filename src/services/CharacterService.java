@@ -465,9 +465,12 @@ public class CharacterService implements INetworkDispatch {
 
 	}
 
+	@Deprecated
 	private String checkForReservedName(String firstName, String lastName) throws SQLException
 	{
-		
+		/*
+		 * This table has been removed.
+		 * 
 		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "reservednames");
 		ResultSet rsc = psc.executeQuery();
@@ -508,7 +511,7 @@ public class CharacterService implements INetworkDispatch {
 			
 			return resultSet.getString("type");
 			
-		}
+		}*/
 		
 		return null;
 	}
