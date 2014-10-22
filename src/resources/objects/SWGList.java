@@ -407,7 +407,15 @@ public class SWGList<E> extends Delta implements List<E> {
 			int size = 0;
 			
 			for (Object o : list) {
+				if (o == null) {
+					System.err.println("ERROR: Null object in SWGList!");
+					continue;
+				}
 				byte[] object = Baseline.toBytes(o);
+				if (object == null) {
+					System.err.println("ERROR: Null Baseline.toBytes in SWGList!");
+					continue;
+				}
 				size += object.length;
 				
 				IoBuffer buffer = createBuffer(size);

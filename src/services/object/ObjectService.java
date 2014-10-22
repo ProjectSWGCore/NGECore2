@@ -838,22 +838,23 @@ public class ObjectService implements INetworkDispatch {
 
 		// stack overflow when using recursion
 		long newId = 0;
-		try {
+		//try {
 			synchronized(objectMutex) {
-				newId = highestId.get();
+				newId = highestId.incrementAndGet();
 				ObjectDatabase objectIdODB = core.getObjectIdODB();
 				while (objectList.containsKey(newId) || objectIdODB.contains(newId)) {
 					newId = highestId.incrementAndGet();
 				}
+				//System.out.println("Got an objid.");
 			}
-			final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
+			/*final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
 			final PreparedStatement ps2 = databaseConnection.preparedStatement(sql);
 			ps2.setLong(1, newId);
 			ps2.executeUpdate();
 			ps2.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 		return newId;
 	}
