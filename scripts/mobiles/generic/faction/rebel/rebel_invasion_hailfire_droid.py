@@ -30,7 +30,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/droid/shared_droid_rocket_launcher.iff', WeaponType.RIFLE, 1.0, 55, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/droid/shared_droid_rocket_launcher.iff', WeaponType.PISTOL, 0.4, 55, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
