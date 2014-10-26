@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -33,38 +33,37 @@ public class ObjectMenuRequest extends ObjControllerObject {
 	
 	private long characterId;
 	private long targetId;
+	private int optionsCount;
 	private Vector<RadialOptions> radialOptions = new Vector<RadialOptions>();
 	private byte radialCount;
 
 	@Override
 	public void deserialize(IoBuffer buffer) {
+		int listSize;
+		int size;
+		
+		this.characterId = buffer.getLong();
+		this.optionsCount = buffer.getInt();
+		this.targetId = buffer.getLong();
+		this.characterId = buffer.getLong();
 
-		setCharacterId(buffer.getLong());
-		buffer.getInt();
-		setTargetId(buffer.getLong());
-		setCharacterId(buffer.getLong());
-
-		int listSize = buffer.getInt();
+		listSize = buffer.getInt();
 		for(int i = 0; i < listSize; i++) {
 			RadialOptions radial = new RadialOptions();
-		    buffer.get();
+			radial.setOptionId(buffer.get());
 			radial.setParentId(buffer.get());
 			radial.setOptionId(buffer.getShort());
 			radial.setOptionType(buffer.get());
-			int size = buffer.getInt();
+			size = buffer.getInt();
 			if(size > 0) {
-				try {
-					radial.setDescription(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE"));
-					buffer.position(buffer.position() + size * 2);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-			} else {
+				radial.setDescription(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE));
+				buffer.position(buffer.position() + size * 2);
+			} else
 				radial.setDescription("");
-			}
-			radialOptions.add(radial);
+			
+			this.radialOptions.add(radial);
 		}
-		setRadialCount(buffer.get());
+		this.radialCount = buffer.get();
 	}
 
 	@Override
@@ -81,24 +80,16 @@ public class ObjectMenuRequest extends ObjControllerObject {
 		return targetId;
 	}
 
-	public void setTargetId(long targetId) {
-		this.targetId = targetId;
-	}
-
 	public long getCharacterId() {
 		return characterId;
-	}
-
-	public void setCharacterId(long characterId) {
-		this.characterId = characterId;
 	}
 
 	public byte getRadialCount() {
 		return radialCount;
 	}
-
-	public void setRadialCount(byte radialCount) {
-		this.radialCount = radialCount;
+	
+	public int getOptionsCount() {
+		return optionsCount;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 
+@Deprecated
 public class ObjController_448 extends ObjControllerObject {
 	
 	private long objectId;

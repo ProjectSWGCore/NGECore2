@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -46,21 +46,13 @@ public class SUIEventNotification extends SWGMessage {
 		updateCounter = buffer.getInt();
 		
 		for(int i = 0; i < count; ++i) {
-
+			
 			int size = buffer.getInt();
 			if(size > 0) {
-
-				try {
-					returnList.add(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE"));
-					buffer.position(buffer.position() + size * 2);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-				
+				returnList.add(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE));
+				buffer.position(buffer.position() + size * 2);
 			}
-
 		}
-		
 	}
 
 	@Override

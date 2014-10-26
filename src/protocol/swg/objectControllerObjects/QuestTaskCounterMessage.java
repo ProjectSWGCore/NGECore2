@@ -26,16 +26,17 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import resources.quest.Quest;
 
 public class QuestTaskCounterMessage extends ObjControllerObject {
 	
 	private long objectId;
-	private String questName;
+	private Quest quest;
 	private String stf;
 
-	public QuestTaskCounterMessage(long objectId, String questName, String stf) {
+	public QuestTaskCounterMessage(long objectId, Quest quest, String stf) {
 		this.objectId = objectId;
-		this.questName = questName;
+		this.quest = quest;
 		this.stf = stf;
 	}
 
@@ -47,7 +48,7 @@ public class QuestTaskCounterMessage extends ObjControllerObject {
 	@Override
 	public IoBuffer serialize() {
 
-		byte[] questNameBytes = getAsciiString(questName);
+		byte[] questNameBytes = getAsciiString(quest.getCrcName());
 		byte[] stfBytes = getUnicodeString(stf);
 		
 		IoBuffer buffer = IoBuffer.allocate(38 + questNameBytes.length + stfBytes.length).order(ByteOrder.LITTLE_ENDIAN);
@@ -57,10 +58,10 @@ public class QuestTaskCounterMessage extends ObjControllerObject {
 		buffer.putInt(0);
 		
 		buffer.put(questNameBytes);
-		buffer.putInt(1); // ??
+		buffer.putInt(quest.getCounterMax()); // Max count
 		buffer.put(stfBytes);
-		buffer.putInt(0); // ??
-		buffer.putInt(1); // ??
+		buffer.putInt(0); // spacer?
+		buffer.putInt(quest.getCounterValue()); // Current count
 		
 		return buffer.flip();	
 	}

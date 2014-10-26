@@ -25,6 +25,7 @@ def addPlanetSpawns(core, planet):
 	patrolpoints = Vector()
 	patrolpoints.add(Point3D(float(3531), float(4), float(-4803.1)))
 	patrolpoints.add(Point3D(float(3529.7), float(4.8), float(-4813.3)))
+	patrolpoints.add(Point3D(float(3529.7), float(4.8), float(-4824.3)))
 	patrolpoints.add(Point3D(float(3545.3), float(5), float(-4838.6)))
 	patrolpoints.add(Point3D(float(3527.5), float(4.8), float(-4863.4)))
 	patrolpoints.add(Point3D(float(3519.5), float(5), float(-4874.7)))

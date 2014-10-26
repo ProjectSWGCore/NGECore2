@@ -1,4 +1,5 @@
 import sys
+import sys
 from resources.datatables import Posture
 
 def setup():
@@ -14,4 +15,3 @@ def run(core, actor, target, commandString):
 	actor.setTurnRadius(0)
 
 	return
-	

@@ -26,13 +26,12 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class PlayClientEffectObjectMessage extends SWGMessage {
-
+	
 	private long objectId;
 	private String effectFile;
 	private String commandString;
-
+	
 	public PlayClientEffectObjectMessage(String effectFile, long objectId, String commandString) {
-		
 		this.effectFile = effectFile;
 		this.objectId = objectId;
 		this.commandString = commandString;
@@ -40,33 +39,21 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 	
 	@Override
 	public IoBuffer serialize() {
-
-		IoBuffer result = IoBuffer.allocate(20 + effectFile.length() + commandString.length()).order(ByteOrder.LITTLE_ENDIAN);
-
+		int size = 20 + effectFile.length() + commandString.length() + ((effectFile.startsWith("clienteffect/holoemote_") ? commandString.length() : 0));
+		IoBuffer result = IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
 		result.putShort((short) 5);
 		result.putInt(0x8855434A);
 		result.put(getAsciiString(effectFile));
-		
-		if(!effectFile.startsWith("clienteffect/holoemote_")) 
-		{
-			result.putShort((short) 0); // Because waverunner is a dweeb
-			result.putLong(objectId);
-			result.put(getAsciiString(commandString));	
-		}
-		else
-		{
-			result.put(getAsciiString(commandString));
-			result.putLong(objectId);
-		}
-		
+		result.put(getAsciiString(effectFile.startsWith("clienteffect/holoemote_") ? commandString : ""));
+		result.putLong(objectId);
+		result.put(getAsciiString(commandString));
 		return result.flip();
-
 	}
-
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }

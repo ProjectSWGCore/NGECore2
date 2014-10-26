@@ -100,5 +100,7 @@ public class Opcodes {
 	public static final int CreateCharacterSuccess = 0x1DB575CC;
 	public static final int PlayerMoneyResponse = 0x367E737E;
 	public static final int CmdStartScene = 0x3AE6DFAE;
-	
+	public static final int IncubatorStartMessage = CRC.StringtoCRC("IncubatorStartMessage");
+	public static final int EnterTicketPurchaseModeMessage = 0x904DAE1A;
+	public static final int ResourceListForSurveyMessage = 0x8A64B1D5;
 }

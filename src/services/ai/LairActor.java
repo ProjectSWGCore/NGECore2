@@ -21,15 +21,24 @@
  ******************************************************************************/
 package services.ai;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import engine.resources.scene.Point3D;
 import main.NGECore;
 import net.engio.mbassy.listener.Handler;
 import resources.common.SpawnPoint;
+import resources.datatables.Posture;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import services.ai.states.RetreatState;
 import services.combat.CombatEvents.DamageTaken;
 import tools.DevLog;
 
@@ -45,11 +54,13 @@ public class LairActor {
 	private short level;
 	private String bossTemplate;
 	private boolean bossSpawned = false;
+	private Map<CreatureObject, Long> attackerMap = new ConcurrentHashMap<CreatureObject, Long>();
 	
 	public LairActor(TangibleObject lairObject, String creatureTemplate) {
 		this.lairObject = lairObject;
 		this.creatureTemplate = creatureTemplate;
 		lairObject.getEventBus().subscribe(this);
+		checkAttackerTask();
 	}
 	
 	public LairActor(TangibleObject lairObject, String creatureTemplate, int maxSpawns, short level) {
@@ -58,6 +69,7 @@ public class LairActor {
 		this.maxSpawns = maxSpawns;
 		this.level = level;
 		lairObject.getEventBus().subscribe(this);
+		checkAttackerTask();
 	}
 	
 	public LairActor(TangibleObject lairObject, Vector<String> creatureTemplates, int maxSpawns, short level) {
@@ -66,6 +78,7 @@ public class LairActor {
 		this.maxSpawns = maxSpawns;
 		this.level = level;
 		lairObject.getEventBus().subscribe(this);
+		checkAttackerTask();
 	}
 
 	
@@ -90,40 +103,55 @@ public class LairActor {
 			ai.addDefender((CreatureObject)event.attacker);
 			((CreatureObject)event.attacker).addDefender(ai.getCreature());
 		}
-		
-		
+		attackerMap.put(((CreatureObject)event.attacker), System.currentTimeMillis());		
 	}
 
 	public void spawnNewCreatures() {
 		
+		// remove dead creatures from collection
+		creatures.removeAll(Collections.singleton(null));
+		Vector<AIActor> removers = new Vector<AIActor>();
+		for (AIActor act : creatures){
+			if (act!=null ){
+				if (act.getCreature().getPosture()==Posture.Dead)
+					removers.add(act);
+				else if (lairObject.getPosition().getDistance2D(act.getCreature().getPosition())>80)
+					removers.add(act);
+			} 
+		}
+		creatures.removeAll(removers);
+				
 		if(creatures.size() >= maxSpawns)
 			return;
 		
 		int currentCondition = lairObject.getConditionDamage();
 		int maxCondition = lairObject.getMaximumCondition();
-		
+		//System.out.println("spawnWave " + spawnWave + " currentCondition " + currentCondition + " maxCondition " + maxCondition + "quot " + ((float)currentCondition / (float)maxCondition));
 		switch(spawnWave) {
 			// TODO: play damage effect
 			case 0: 
 				spawnWave++;
 				break;
 			case 1:
-				if((currentCondition / maxCondition) < 0.7) {
+				if(((float)currentCondition / (float)maxCondition) < 0.7) {
 					spawnWave++;
+					break;
 				} else {
 					return;
 				}
 			case 2:
-				if((currentCondition / maxCondition) < 0.3) {
+				if(((float)currentCondition / (float)maxCondition) < 0.3) {
 					spawnWave++;
+					break;
 				} else {
 					return;
 				}
-				break;
+				
 			case 3:
 				if (bossTemplate!=null && ! bossSpawned){
-					//CreatureObject boss = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(bossTemplate, lairObject.getPlanet().getName(), 0L, lairObject.getPosition().x + 3, lairObject.getPosition().y, lairObject.getPosition().z, lairObject.getOrientation().w, lairObject.getOrientation().x, lairObject.getOrientation().y,lairObject.getOrientation().z,-1);
+					CreatureObject boss = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(bossTemplate, lairObject.getPlanet().getName(), 0L, lairObject.getPosition().x + 3, lairObject.getPosition().y, lairObject.getPosition().z, lairObject.getOrientation().w, lairObject.getOrientation().x, lairObject.getOrientation().y,lairObject.getOrientation().z,-1);
 					bossSpawned = true;
+					break;
 				}
 				return;
 				
@@ -138,7 +166,9 @@ public class LairActor {
 			creatureAmount = new Random().nextInt(4) + (maxSpawns / 5);
 			tries++;
 		}
-		while(creatureAmount > maxSpawns && tries < 10);
+		while(tries < 10);
+		
+		//while(creatureAmount > maxSpawns && tries < 10);
 				
 		for(int i = 0; i < creatureAmount; i++) {
 			Point3D position = SpawnPoint.getRandomPosition(lairObject.getPosition(), 5, 30, lairObject.getPlanetId());
@@ -210,5 +240,49 @@ public class LairActor {
 
 	public void setBossTemplate(String bossTemplate) {
 		this.bossTemplate = bossTemplate;
+	}
+	
+	private void checkAttackerTask(){
+		final Future<?>[] fut1 = {null};
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+		fut1[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { 
+				try {
+					if (lairObject==null){
+		                Thread.yield();
+		                fut1[0].cancel(false);
+					} else {
+						int currentCondition = lairObject.getConditionDamage();
+						int maxCondition = lairObject.getMaximumCondition();
+						if (currentCondition>maxCondition){
+			                Thread.yield();
+			                fut1[0].cancel(false);
+						}
+					}
+					checkAttackers();	
+				} catch (Exception e) {
+					System.err.println("Exception in checkAttackerTask->scheduleAtFixedRate->checkAttackers() " + e.getMessage());
+				}
+			}
+		}, 0, 10, TimeUnit.SECONDS);
+	}
+	
+	private void checkAttackers(){
+		Map<CreatureObject, Long> attackerMapClone = new ConcurrentHashMap<CreatureObject, Long>(attackerMap);
+		for (CreatureObject attacker : attackerMapClone.keySet()) {
+		    Long lastAttackTime = attackerMapClone.get(attacker);
+		    if (attacker.getWorldPosition().getDistance2D(lairObject.getWorldPosition())>100 || System.currentTimeMillis()-lastAttackTime>10000)
+		    	removeDefender(attacker);
+		}
+		attackerMapClone = null;
+	}
+	
+	private void removeDefender(TangibleObject defender) {
+		if (defender==null){
+			return;
+		}
+		lairObject.removeDefender(defender);
+		if (attackerMap.containsKey(defender)) attackerMap.remove(defender);
+			defender.removeDefender(lairObject);
 	}
 }

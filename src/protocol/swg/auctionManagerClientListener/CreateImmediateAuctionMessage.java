@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg.auctionManagerClientListener;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -35,23 +35,21 @@ public class CreateImmediateAuctionMessage extends SWGMessage {
 	private int price;
 	private int duration;
 	private String description;
-	private byte premium;
+	private boolean isPremium;
 
 	@Override
 	public void deserialize(IoBuffer data) {
 		data.skip(6);
-		setObjectId(data.getLong());
-		setVendorId(data.getLong());
-		setPrice(data.getInt());
-		setDuration(data.getInt()); // in minutes
+		this.objectId = data.getLong();
+		this.vendorId = data.getLong();
+		this.price = data.getInt();
+		this.duration = data.getInt();
+		
 		int size = data.getInt();
-		try {
-			setDescription(new String(ByteBuffer.allocate(size * 2).put(data.array(), data.position(), size * 2).array(), "UTF-16LE"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		
+		this.description = new String(ByteBuffer.allocate(size * 2).put(data.array(), data.position(), size * 2).array(), StandardCharsets.UTF_16LE);
 		data.position(data.position() + size * 2);
-		setPremium(data.get());
+		this.isPremium = data.get() == 0 ? false : true;
 	}
 
 	@Override
@@ -64,50 +62,27 @@ public class CreateImmediateAuctionMessage extends SWGMessage {
 		return objectId;
 	}
 
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
-	}
-
 	public long getVendorId() {
 		return vendorId;
-	}
-
-	public void setVendorId(long vendorId) {
-		this.vendorId = vendorId;
 	}
 
 	public int getPrice() {
 		return price;
 	}
 
-	public void setPrice(int price) {
-		this.price = price;
-	}
-
+/*
+ * @return Duration in minutes
+ */
 	public int getDuration() {
 		return duration;
-	}
-
-	public void setDuration(int duration) {
-		this.duration = duration;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public boolean getPremium() {
-		if(premium == 1)
-			return true;
-		return false;
-	}
-
-	public void setPremium(byte premium) {
-		this.premium = premium;
+	public boolean isPremium() {
+		return isPremium;
 	}
 
 }

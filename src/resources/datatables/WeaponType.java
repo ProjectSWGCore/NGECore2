@@ -26,6 +26,7 @@ public class WeaponType {
 	public static final int RIFLE = 0;
 	public static final int CARBINE = 1;
 	public static final int PISTOL = 2;
+	public static final int HEAVY = 3;
 	public static final int ONEHANDEDMELEE = 4;
 	public static final int TWOHANDEDMELEE = 5;
 	public static final int UNARMED = 6;

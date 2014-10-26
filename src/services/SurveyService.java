@@ -61,8 +61,6 @@ public class SurveyService implements INetworkDispatch {
 	public SurveyService(NGECore core) {
 		this.core = core;
 		scheduleSurveyService();
-		core.commandService.registerCommand("requestsurvey");
-		core.commandService.registerCommand("requestcoreSample");
 	}
 	
 	@SuppressWarnings("unused")

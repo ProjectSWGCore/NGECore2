@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Delta;
 
 public class Quest extends Delta implements Serializable {
@@ -47,6 +46,9 @@ public class Quest extends Delta implements Serializable {
 
 	private ScheduledFuture<?> timer;
 	private long waypointId;
+	
+	private int counterMax;
+	private int counterCurrent;
 	
 	public Quest() {}
 	
@@ -74,25 +76,31 @@ public class Quest extends Delta implements Serializable {
 	public void setOwnerId(long ownerId) {
 		this.ownerId = ownerId;
 	}
-
-	public int getActiveStep() {
+	
+	public boolean isTaskActive(int taskId) {
+		return activeStepBitmask.get(taskId);
+	}
+	
+	public int getActiveTask() {
 		return activeStep;
 	}
 
-	public void setActiveStep(int activeStep) {
+	public void setActiveTask(int activeStep) {
 		this.activeStep = activeStep;
 	}
 
+	public boolean isTaskCompleted(int taskId) {
+		return completedStepBitmask.get(taskId);
+	}
+	
 	public boolean isCompleted() {
 		return isCompleted;
 	}
-
-	public void setCompleted(boolean isCompleted) {
-		if (isCompleted) {
-			//activeStepBitmask.set(activeStep, false);
-			completedStepBitmask.set(activeStep);
-		}
-		this.isCompleted = isCompleted;
+	
+	public void setCompleted() {
+		activeStepBitmask.clear();
+		completedStepBitmask.set(0, 16, true);
+		this.isCompleted = true;
 	}
 
 	public boolean hasRecievedAward() {
@@ -129,8 +137,31 @@ public class Quest extends Delta implements Serializable {
 		
 		activeStep++;
 		activeStepBitmask.set(activeStep, true);
-		
 		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
+	}
+	
+	public void complete() {
+		completedStepBitmask.set(activeStep);
+	}
+	
+	public void completeQuestStep(int step) {
+		completedStepBitmask.set(step);
+		activeStepBitmask.set(step, false);
+	}
+	
+	public void setQuestStep(int step) {
+		activeStep = step;
+		addActiveStep(step);
+	}
+	
+	public void addActiveStep(int step) {
+		activeStepBitmask.set(step, true);
+	}
+	
+	public void reset() {
+		activeStep = 0;
+		activeStepBitmask.clear();
+		completedStepBitmask.clear();
 	}
 	
 	public ScheduledFuture<?> getTimer() {
@@ -141,6 +172,30 @@ public class Quest extends Delta implements Serializable {
 		this.timer = timer;
 	}
 
+	public int getCounterMax() {
+		return counterMax;
+	}
+
+	public void setCounterMax(int counterMax) {
+		this.counterMax = counterMax;
+	}
+
+	public void incrementCounter() {
+		counterCurrent++;
+	}
+	
+	public void decrementCounter() {
+		counterCurrent--;
+	}
+	
+	public int getCounterValue() {
+		return counterCurrent;
+	}
+	
+	public void setCounterValue(int value) {
+		this.counterCurrent = value;
+	}
+	
 	public byte[] getBytes() {
 		byte[] activeStepBytes = activeStepBitmask.toByteArray();
 		byte[] completedStepBytes = completedStepBitmask.toByteArray();
@@ -190,8 +245,7 @@ public class Quest extends Delta implements Serializable {
 		
 		buffer.flip();
 
-		StringUtilities.printBytes(buffer.array());
+		//StringUtilities.printBytes(buffer.array());
 		return buffer.array();
 	}
-	
 }

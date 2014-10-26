@@ -36,27 +36,19 @@ public class SUICreatePageMessage extends SWGMessage{
 	private long rangeObjectId;
 	private float range;
 	
-	
 	public SUICreatePageMessage(String script, int windowId, Vector<SUIWindowComponent> components, long rangeObjectId, float range) {
-		
 		this.script = script;
 		this.windowId = windowId;
 		this.components = components;
 		this.rangeObjectId = rangeObjectId;
 		this.range = range;
-
 	}
-		
-	
-
-	
 	
 	public void deserialize(IoBuffer data) {
 		
 	}
 	
 	public IoBuffer serialize() {
-		
 		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
@@ -65,6 +57,7 @@ public class SUICreatePageMessage extends SWGMessage{
 		
 		result.putInt(windowId);
 		result.put(getAsciiString(script));
+		
 		result.putInt(components.size());
 		
 		for(SUIWindowComponent component : components) {
@@ -85,13 +78,12 @@ public class SUICreatePageMessage extends SWGMessage{
 		}
 		
 		result.putLong(rangeObjectId);
+		result.put(new byte[] { (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F, (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F, (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F});
 		result.putFloat(range);
-		result.putLong(0);
-		result.putInt(0);
-
+		
 		int size = result.position();
 		result = IoBuffer.allocate(size).put(result.array(), 0, size);
-
+		
 		return result.flip();	
 	}
 }

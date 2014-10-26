@@ -60,6 +60,7 @@ public class ConversationService implements INetworkDispatch {
 		core.simulationService.faceTarget(npc, player);
 		
 		player.setConversingNpc(npc);
+		// TODO: Come up with a way for not needing to send the StartConversation packet, some only sent the end conversation packet to show the chat bubble
 		sendStartConversation(player, npc);
 		core.scriptService.callScript("scripts/conversation/", (String) npc.getAttachment("conversationFile"), "startConversation", core, player, npc);
 	}

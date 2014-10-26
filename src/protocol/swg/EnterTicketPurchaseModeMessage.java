@@ -23,32 +23,21 @@ package protocol.swg;
 
 import java.nio.ByteOrder;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
-import services.travel.TravelPoint;
-import engine.resources.objects.SWGObject;
+import resources.common.Opcodes;
+import engine.resources.common.StringUtilities;
 
-@SuppressWarnings("unused")
 public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
 	private String planetName;
-	private String cityName;
-	private SWGObject player;
-	private boolean isItv = false;
+	private String nearestPointName;
+	private boolean isInstant = false;
 	
-	public EnterTicketPurchaseModeMessage(String planetName, String cityName, SWGObject player, boolean isItv) {
+	public EnterTicketPurchaseModeMessage(String planetName, String nearestPointName, boolean isInstant) {
 		this.planetName = planetName;
-		this.cityName = cityName;
-		this.player = player;
-		this.isItv = true;
-	}
-	
-	public EnterTicketPurchaseModeMessage(String planetName, String cityName, SWGObject player) {
-		this.planetName = planetName;
-		this.cityName = cityName;
-		this.player = player;
+		this.nearestPointName = nearestPointName;
+		this.isInstant = isInstant;
 	}
 	
 	@Override
@@ -58,22 +47,13 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		final NGECore core = NGECore.getInstance();
-		
-		TravelPoint nearestPoint = null;
-		if (!isItv) nearestPoint = core.travelService.getNearestTravelPoint(player);
-		else nearestPoint = core.travelService.getNearestTravelPoint(player, 5120);
-		
-		IoBuffer result = IoBuffer.allocate(11 + planetName.length() + nearestPoint.getName().length()).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(11 + planetName.length() + nearestPointName.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 3);
-		result.putInt(0x904DAE1A);
-		
-		result.put(getAsciiString(planetName));
-		result.put(getAsciiString(nearestPoint.getName()));
-		
-		
-		result.put((byte) 0);
+		result.putInt(Opcodes.EnterTicketPurchaseModeMessage);
+		result.put(StringUtilities.getAsciiString(planetName));
+		result.put(StringUtilities.getAsciiString(nearestPointName));
+		result.put(isInstant ? (byte) 1 : (byte) 0);
 		
 		return result.flip();
 	}

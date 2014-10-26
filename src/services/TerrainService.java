@@ -198,9 +198,70 @@ public class TerrainService {
 		loadClientRegions(planet);
 	}
 
-	
 	public void loadSnapShotObjects() {
+
+		Map<Planet, Thread> threadMap = new HashMap<Planet, Thread>();
 		
+		for(final Planet planet : planets) {
+			
+			if(planet.getSnapshotVisitor() != null) {
+
+				Config options = core.getOptions();
+
+				if (options != null && options.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+					if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
+						try {							
+							core.objectService.loadSnapshotObjects(planet);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
+				if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+					if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){	
+						if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
+							try {
+								System.out.println("Loading buildout objects for: " + planet.getName());
+								core.objectService.loadBuildoutObjects(planet);
+								System.out.println("Finished loading buildout objects for: " + planet.getName());
+							} catch (InstantiationException | IllegalAccessException e) {
+								e.printStackTrace();
+							}
+						} else {
+							if (planet.getName().trim().equals(options.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
+								try {		
+									System.out.println("Loading buildout objects for: " + planet.getName());
+									core.objectService.loadBuildoutObjects(planet);
+									System.out.println("Finished loading buildout objects for " + planet.getName());
+								} catch (InstantiationException | IllegalAccessException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+				
+			}
+			
+		}
+		
+//		// wait for threads to finish loading
+//		for(Planet planet : planets) {
+//			try {
+//				if(threadMap.get(planet) != null)
+//					threadMap.get(planet).join();
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+	
+	}
+	
+	
+	public void loadSnapShotObjectsOLD() {
+		// Unwise to allow concurrent access to a single Sleepycat odb for 11 threads!
+		// Several objects didn't get loaded due to access restrictions
 		Map<Planet, Thread> threadMap = new HashMap<Planet, Thread>();
 		
 		for(final Planet planet : planets) {
@@ -221,7 +282,7 @@ public class TerrainService {
 					}
 					
 					if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){	
 							if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {
 									System.out.println("Loading buildout objects for: " + planet.getName());

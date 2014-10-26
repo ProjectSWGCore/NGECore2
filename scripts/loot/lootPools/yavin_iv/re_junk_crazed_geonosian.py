@@ -1,7 +1,7 @@
 
 def itemNames():
 	
-	return ['armor_repair_device','dented_metal_case',medical_console','worklight']
+	return ['armor_repair_device','dented_metal_case','medical_console','worklight']
 
 def itemChances():
 

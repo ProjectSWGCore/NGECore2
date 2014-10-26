@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -41,6 +42,7 @@ import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.OutOfBand;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -49,6 +51,7 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
+import services.command.BaseSWGCommand;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
@@ -73,13 +76,14 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	private transient int pvpBitmask = 0;
 	
-	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private transient List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	private transient boolean looted = false;	
 	private transient boolean lootLock = false;	
 	private transient boolean creditRelieved = false;	
 	private transient boolean lootItem = false;
 	private transient TangibleObject killer = null;
+	
+	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	
 	public TangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
 		super(objectID, planet, position, orientation, template);
@@ -100,6 +104,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		defendersList = new Vector<TangibleObject>();
+		cooldowns = new ConcurrentHashMap<String, Long>();
 	}
 	
 	public Baseline getOtherVariables() {
@@ -419,7 +424,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
-	public boolean isAttackableBy(CreatureObject attacker) {
+	public boolean isAttackableBy(TangibleObject attacker) {
 		int pvpStatus = NGECore.getInstance().factionService.calculatePvpStatus(attacker, this);
 		return (((pvpStatus & PvpStatus.Attackable) == PvpStatus.Attackable) || ((pvpStatus & PvpStatus.Aggressive) == PvpStatus.Aggressive));
 	}
@@ -597,10 +602,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 			return false;
 		
 		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit");
-		
-		if (containerVolumeLimit == 0 || getTemplate() == "object/tangible/inventory/shared_appearance_inventory.iff") // appearance inventory - issue #755
+		if (containerVolumeLimit == 0 || getTemplate().equals("object/tangible/inventory/shared_appearance_inventory.iff")) // appearance inventory - issue #755 String equality vs String identity ...
 			return false;
-
 		
 		if (NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit)
 			return true;
@@ -608,9 +611,52 @@ public class TangibleObject extends SWGObject implements Serializable {
 		return false;
 	}
 	
+	public void addCooldown(String cooldownGroup, float cooldownTime) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
+		}
+		
+		long duration = System.currentTimeMillis() + ((long) (cooldownTime * 1000F)); 
+		
+		cooldowns.put(cooldownGroup, duration);
+	}
+	
+	public boolean hasCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
+				return true;
+			} else {
+				cooldowns.remove(cooldownGroup);
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
+		if (cooldowns.containsKey(command.getCooldownGroup())) {
+			cooldowns.remove(command.getCooldownGroup());
+			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1)).serialize());
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public long getRemainingCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
+				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
+			} else {
+				cooldowns.remove(cooldownGroup);
+			}
+		}
+		
+		return 0L;
+	}
+	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
-		// notifyObservers(buffer, false); // ??? Ignores the notifySelf argument. Was this done purposely? Faction Status etc. can't update the client without it
-		notifyObservers(buffer, notifySelf);
+		notifyObservers(buffer, false);
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {
@@ -623,26 +669,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
-	@Override
 	public void sendBaselines(Client destination) {
 		if (destination != null && destination.getSession() != null) {
-			
-			// Factional peculiarities
-			Baseline baseLine3 = getBaseline(3);
-			if (destination.getParent() instanceof CreatureObject){
-				if (((CreatureObject) destination.getParent()).isPlayer() && ((CreatureObject) destination.getParent()).getFaction()!=this.getFaction()){
-					int optionsBitMask = getOptionsBitmask();
-					if (getOption(Options.QUEST))
-						optionsBitMask = optionsBitMask & ~Options.QUEST;
-					if (!getOption(Options.ATTACKABLE))
-						optionsBitMask = optionsBitMask | Options.ATTACKABLE;
-					
-					baseLine3.set("optionsBitmask", optionsBitMask);
-				}
-			}
-						
-			//destination.getSession().write(getBaseline(3).getBaseline());
-			destination.getSession().write(baseLine3.getBaseline());
+			destination.getSession().write(getBaseline(3).getBaseline());
 			destination.getSession().write(getBaseline(6).getBaseline());
 			
 			Client parent = ((getGrandparent() == null) ? null : getGrandparent().getClient());
@@ -655,17 +684,11 @@ public class TangibleObject extends SWGObject implements Serializable {
 			if (destination.getParent() != this) {
 				UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
 				upvpm.setFaction(CRC.StringtoCRC(getFaction()));
-//				if (this.getTemplate().contains("barricade")){
-//					System.out.println("BARTANO RESULT " + NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
-//				}
-				
 				upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
 				destination.getSession().write(upvpm.serialize());
 			}
 		}
 	}
-	
-	
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {

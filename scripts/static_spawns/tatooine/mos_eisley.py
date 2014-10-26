@@ -72,9 +72,7 @@ def addPlanetSpawns(core, planet):
 	r3j7 = stcSvc.spawnObject('r3j7', 'tatooine', long(0), float(3311.1), float(4.0), float(-4820.2), float(0.38), float(-0.92)) 
 
 	noble4 = stcSvc.spawnObject('noble', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
-	
-	byxlePedette = stcSvc.spawnObject('byxlepedette', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
-	
+		
 	errikDarksider = stcSvc.spawnObject('errikdarksider', 'tatooine', long(0), float(3381), float(4.6), float(-4498), float(0.91), float(0.40)) 
 	
 	gendra = stcSvc.spawnObject('gendra', 'tatooine', long(0), float(3308), float(5.6), float(-4785), float(0.84), float(0.53)) 
@@ -100,9 +98,7 @@ def addPlanetSpawns(core, planet):
 	alduq = stcSvc.spawnObject('alduq', 'tatooine', long(0), float(3512), float(5.0), float(-4814), float(-0.164), float(0.986)) 
 
 	#Eisley Legacy Quest NPCs
-	
-	vourk = stcSvc.spawnObject('vourk', 'tatooine', long(0), float(3520.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
-	
+		
 	building = core.objectService.getObject(long(1279956)) 
 	mayor = stcSvc.spawnObject('mos_eisley_mayor', 'tatooine', building.getCellByCellNumber(4), float(1.2), float(2.5), float(5.4), float(0), float(0), float(0), float(0))
 	

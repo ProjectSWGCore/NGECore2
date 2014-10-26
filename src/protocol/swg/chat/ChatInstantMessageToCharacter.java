@@ -21,7 +21,6 @@
  ******************************************************************************/
 package protocol.swg.chat;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 

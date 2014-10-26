@@ -12,6 +12,6 @@ def setup(core, object):
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade', 2)
 	object.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_1')
 	object.setStringAttribute('@set_bonus:piece_bonus_count_4', '@set_bonus:set_bonus_commando_dps_2')
-	object.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3)
+	object.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
 	object.setAttachment('setBonus', 'set_bonus_commando_dps')
 	return

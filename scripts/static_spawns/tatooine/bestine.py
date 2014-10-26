@@ -44,7 +44,7 @@ def addPlanetSpawns(core, planet):
 	gilBurtin = stcSvc.spawnObject('gilburtin', 'tatooine', hotel.getCellByCellNumber(5), float(20.3), float(1.6), float(12.8), float(0), float(0), float(0.99), float(0))
 	
 	# Outside
-	barak = stcSvc.spawnObject('brokerbarak', 'tatooine', long(0), float(-1049), float(5.0), float(-3537), float(0.97), float(0.23))
+	barak = stcSvc.spawnObject('brokerbarak', 'tatooine', long(0), float(-1049), float(10), float(-3537), float(0.97), float(0.23))
 	
 	barrezz = stcSvc.spawnObject('barezz', 'tatooine', long(0), float(-1146.8), float(98.0), float(-3892.1), float(0.75), float(0.65))
 	

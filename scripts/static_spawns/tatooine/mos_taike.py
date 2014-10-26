@@ -15,6 +15,7 @@ def addPlanetSpawns(core, planet):
 	
 	# TODO Check all NPCs for personalized scripting, change format.
 
+	kara = stcSvc.spawnObject('kara', 'tatooine', long(0), float(3839), float(16.13), float(2335), float(-0.1), float(0.98))
 	
 	#Junkdealer
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3902), float(33), float(2362), float(0), float(0))

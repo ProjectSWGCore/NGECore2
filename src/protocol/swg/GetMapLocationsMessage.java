@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -40,16 +40,15 @@ public class GetMapLocationsMessage extends SWGMessage{
 	}
 	
 	public void deserialize(IoBuffer buffer) {
+		short size;
+		
 		buffer.getShort();
 		buffer.getInt();
-		short size = buffer.getShort();
-		try {
-			planet = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "US-ASCII");
-			buffer.position(buffer.position() + size);
-		}
-		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		size = buffer.getShort();
+
+		planet = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), StandardCharsets.US_ASCII);
+		buffer.position(buffer.position() + size);
+
 		x = buffer.getFloat();
 		y = buffer.getFloat();
 		category = buffer.get();

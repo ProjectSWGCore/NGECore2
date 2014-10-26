@@ -945,8 +945,9 @@ public abstract class AIState {
 				if (actor!=null)
 					actor.destroyActor();
 				if (creature!=null){
-					core.simulationService.remove(creature, creature.getWorldPosition().x, creature.getWorldPosition().z, true); // Make sure
-					core.objectService.destroyObject(creature.getObjectID());	
+					// taken out due to double respawn, check invasions
+//					core.simulationService.remove(creature, creature.getWorldPosition().x, creature.getWorldPosition().z, true); // Make sure
+//					core.objectService.destroyObject(creature.getObjectID());	
 				}
 				return; // First Patrol point reached
 			}

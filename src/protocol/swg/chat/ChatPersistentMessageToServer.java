@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg.chat;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,79 +45,66 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 		buffer.getShort();
 		buffer.getInt();
 		
-		
 		int size;
 		
-		try {
-			size = buffer.getInt();
-			setMessage(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE"));
-			buffer.position(buffer.position() + size * 2);
+		size = buffer.getInt();
+		this.message = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE);
+		buffer.position(buffer.position() + size * 2);
 			
-			int attachmentsSize = buffer.getInt() * 2; 	
+		int attachmentsSize = buffer.getInt() * 2; 	
 			
-			/*while(attachmentsSize > 0) {
+		/*while(attachmentsSize > 0) {
+			buffer.get();
+			--attachmentsSize;
+		}*/
+			
+		if(attachmentsSize > 0) {
+				
+			int position = buffer.position();
+			
+			while(buffer.position() < position + attachmentsSize) {
+					
+				short appendByte = buffer.getShort();
 				buffer.get();
-				--attachmentsSize;
-			}*/
-			
-			if(attachmentsSize > 0) {
-				
-				int position = buffer.position();
-				
-				while(buffer.position() < position + attachmentsSize) {
+				int type = buffer.getInt();
 					
-					short appendByte = buffer.getShort();
-					buffer.get();
-					int type = buffer.getInt();
+				if(type == 0xFFFFFFFD) {
+						
+					WaypointAttachment waypoint = new WaypointAttachment();
+						
+					buffer.getInt(); // unk 0
+					waypoint.positionX = buffer.getFloat();
+					waypoint.positionY = buffer.getFloat();
+					waypoint.positionZ = buffer.getFloat();
+					buffer.getLong(); // unk
+					waypoint.planetCRC = buffer.getInt();
+					size = buffer.getInt();
+					waypoint.name = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE);
+					buffer.position(buffer.position() + size * 2);
+					waypoint.cellID = buffer.getLong();
+					waypoint.color = buffer.get();
+					waypoint.active = buffer.get() == 0 ? false : true;
+					waypointAttachments.add(waypoint);
 					
-					if(type == 0xFFFFFFFD) {
+					if(appendByte > 0)
+						buffer.get();
 						
-						WaypointAttachment waypoint = new WaypointAttachment();
-						
-						buffer.getInt(); // unk 0
-						waypoint.positionX = buffer.getFloat();
-						waypoint.positionY = buffer.getFloat();
-						waypoint.positionZ = buffer.getFloat();
-						buffer.getLong(); // unk
-						waypoint.planetCRC = buffer.getInt();
-						size = buffer.getInt();
-						waypoint.name = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE");
-						buffer.position(buffer.position() + size * 2);
-						waypoint.cellID = buffer.getLong();
-						waypoint.color = buffer.get();
-						byte active = buffer.get();
-						if(active == 1)
-							waypoint.active = true;
-						else
-							waypoint.active = false;
-
-						waypointAttachments.add(waypoint);
-						//System.out.println(waypoint.name);
-						if(appendByte > 0)
-							buffer.get();
-						
-					}
 				}
-				
 			}
-
-			setCounter(buffer.getInt());
-			
-			size = buffer.getInt();
-			setSubject(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE"));
-			buffer.position(buffer.position() + size * 2);
-			
-			buffer.getInt(); // spacer
-
-			size = buffer.getShort();
-			setRecipient(new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "US-ASCII"));
-			buffer.position(buffer.position() + size);
-
-			
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+				
 		}
 		
+		this.counter = buffer.getInt();
+
+		size = buffer.getInt();
+		this.subject = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE);
+		buffer.position(buffer.position() + size * 2);
+
+		buffer.getInt(); // spacer
+
+		size = buffer.getShort();
+		this.recipient = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), StandardCharsets.US_ASCII);
+		buffer.position(buffer.position() + size);
 
 	}
 
@@ -130,42 +117,20 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
 	public String getSubject() {
 		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
 	}
 
 	public String getRecipient() {
 		return recipient;
 	}
 
-	public void setRecipient(String recipient) {
-		this.recipient = recipient;
-	}
-
 	public int getCounter() {
 		return counter;
 	}
 
-	public void setCounter(int counter) {
-		this.counter = counter;
-	}
-	
 	public List<WaypointAttachment> getWaypointAttachments() {
 		return waypointAttachments;
 	}
-
-	public void setWaypointAttachments(List<WaypointAttachment> waypointAttachments) {
-		this.waypointAttachments = waypointAttachments;
-	}
-
-
 
 }

@@ -70,7 +70,7 @@ public class WeatherService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}, 30, 30, TimeUnit.MINUTES);
+		}, 15, 15, TimeUnit.MINUTES);
 		
 	}
 

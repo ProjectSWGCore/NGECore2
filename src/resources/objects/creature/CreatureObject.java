@@ -21,12 +21,15 @@
  ******************************************************************************/
 package resources.objects.creature;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -41,7 +44,6 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
-import protocol.swg.objectControllerObjects.StartTask;
 import engine.clients.Client;
 import engine.resources.objects.Baseline;
 import resources.objects.SWGList;
@@ -56,7 +58,6 @@ import resources.common.OutOfBand;
 import resources.datatables.Difficulty;
 import resources.equipment.Equipment;
 import resources.group.GroupInviteInfo;
-import services.command.BaseSWGCommand;
 import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
@@ -71,20 +72,19 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient CreatureMessageBuilder messageBuilder;
 	
 	private transient List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
-	private transient ScheduledFuture<?> incapTask;
-	private transient ScheduledFuture<?> entertainerExperience;
-	private transient ScheduledFuture<?> inspirationTick;
-	private transient CreatureObject performanceWatchee;
-	private transient CreatureObject performanceListenee;
+	private transient ScheduledFuture<?> incapTask = null;
+	private transient ScheduledFuture<?> entertainerExperience = null;
+	private transient ScheduledFuture<?> inspirationTick = null;
+	private transient CreatureObject performanceWatchee = null;
+	private transient CreatureObject performanceListenee = null;
 	private transient List<CreatureObject> performanceAudience = new ArrayList<CreatureObject>();
-	private transient ScheduledFuture<?> spectatorTask;
+	private transient ScheduledFuture<?> spectatorTask = null;
 	private transient int flourishCount = 0;
-	private transient boolean performingEffect;
-	private transient boolean performingFlourish;
-	private transient TangibleObject conversingNpc;
-	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
+	private transient boolean performingEffect = false;
+	private transient boolean performingFlourish = false;
+	private transient TangibleObject conversingNpc = null;
 	private transient long tefTime = 0;
-	private transient SWGObject useTarget;
+	private transient SWGObject useTarget = null;
 	private transient boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -111,6 +111,21 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void initAfterDBLoad() {
 		super.initAfterDBLoad();
+		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		incapTask = null;
+		entertainerExperience = null;
+		inspirationTick = null;
+		performanceWatchee = null;
+		performanceListenee = null;
+		performanceAudience = new ArrayList<CreatureObject>();
+		spectatorTask = null;
+		flourishCount = 0;
+		performingEffect = false;
+		performingFlourish = false;
+		conversingNpc = null;
+		tefTime = 0;
+		useTarget = null;
+		isConstructing = false;
 		System.out.println("Name: " + getCustomName());
 		System.out.println("  Cash Credits: " + getCashCredits());
 		System.out.println("  Bank Credits: " + getBankCredits());
@@ -194,7 +209,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("visibleOnRadar", true);
 		baseline.put("isPet", false);
 		baseline.put("32", (byte) 0);
-		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 31, false));
+		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 33, false));
 		baseline.put("34", (long) 0);
 		return baseline;
 	}
@@ -224,9 +239,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setBankCredits(int bankCredits) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(1).set("bankCredits", bankCredits));
-		}
+		notifySelf(getBaseline(1).set("bankCredits", bankCredits));
 	}
 	
 	public void addBankCredits(int bankCredits) {
@@ -246,9 +259,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setCashCredits(int cashCredits) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(1).set("cashCredits", cashCredits));
-		}
+		notifySelf(getBaseline(1).set("cashCredits", cashCredits));
 	}
 	
 	public void addCashCredits(int cashCredits) {
@@ -294,7 +305,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setIncapacityTimer(int incapacityTimer) {
-		notifyClients(getBaseline(3).set("uses", incapacityTimer), true);
+		notifyObservers(getBaseline(3).set("uses", incapacityTimer), true);
 	}
 	
 	public byte getPosture() {
@@ -397,7 +408,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setHeight(float height) {
-		height = (((height < 0.7) || (height > 1.5)) ? 1 : height);
+		// height = (((height < 0.7) || (height > 1.5)) ? 1 : height); Babies need height values smaller than that
 		notifyObservers(getBaseline(3).set("height", height), true);
 	}
 	
@@ -438,9 +449,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setAccelerationMultiplierBase(float accelerationMultiplierBase) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("accelerationMultiplierBase", accelerationMultiplierBase));
-		}
+		notifySelf(getBaseline(4).set("accelerationMultiplierBase", accelerationMultiplierBase));
 	}
 	
 	public float getAccelerationMultiplierMod() {
@@ -448,9 +457,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setAccelerationMultiplierMod(float accelerationMultiplierMod) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("accelerationMultiplierMod", accelerationMultiplierMod));
-		}
+		notifySelf(getBaseline(4).set("accelerationMultiplierMod", accelerationMultiplierMod));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -543,9 +550,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSpeedMultiplierBase(float speedMultiplierBase) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("speedMultiplierBase", speedMultiplierBase));
-		}
+		notifySelf(getBaseline(4).set("speedMultiplierBase", speedMultiplierBase));
 	}
 	
 	public float getSpeedMultiplierMod() {
@@ -553,9 +558,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSpeedMultiplierMod(float speedMultiplierMod) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("speedMultiplierMod", speedMultiplierMod));
-		}
+		notifySelf(getBaseline(4).set("speedMultiplierMod", speedMultiplierMod));
 	}
 	
 	public long getListenToId() {
@@ -563,9 +566,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setListenToId(long listenToId) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("listenToId", listenToId));
-		}
+		notifySelf(getBaseline(4).set("listenToId", listenToId));
 	}
 	
 	public float getRunSpeed() {
@@ -573,9 +574,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setRunSpeed(float runSpeed) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("runSpeed", runSpeed));
-		}
+		notifySelf(getBaseline(4).set("runSpeed", runSpeed));
 	}
 	
 	public float getSlopeModAngle() {
@@ -583,9 +582,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSlopeModAngle(float slopeModAngle) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("slopeModAngle", slopeModAngle));
-		}
+		notifySelf(getBaseline(4).set("slopeModAngle", slopeModAngle));
 	}
 	
 	public float getSlopeModPercent() {
@@ -593,9 +590,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSlopeModPercent(float slopeModPercent) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("slopeModPercent", slopeModPercent));
-		}
+		notifySelf(getBaseline(4).set("slopeModPercent", slopeModPercent));
 	}
 	
 	public float getTurnRadius() {
@@ -603,9 +598,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setTurnRadius(float turnRadius) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("turnRadius", turnRadius));
-		}
+		notifySelf(getBaseline(4).set("turnRadius", turnRadius));
 	}
 	
 	public float getWalkSpeed() {
@@ -613,9 +606,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setWalkSpeed(float walkSpeed) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("walkSpeed", walkSpeed));
-		}
+		notifySelf(getBaseline(4).set("walkSpeed", walkSpeed));
 	}
 	
 	public float getWaterModPercent() {
@@ -623,9 +614,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setWaterModPercent(float waterModPercent) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("waterModPercent", waterModPercent));
-		}
+		notifySelf(getBaseline(4).set("waterModPercent", waterModPercent));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -665,9 +654,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setDisplayXp(int displayXp) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("displayXp", displayXp));
-		}
+		notifySelf(getBaseline(4).set("displayXp", displayXp));
 	}
 	
 	public short getLevel() {
@@ -752,9 +739,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void updateGroupInviteInfo() {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(6).set("groupInviteInfo", getGroupInviteInfo()));
-		}
+		notifySelf(getBaseline(6).set("groupInviteInfo", getGroupInviteInfo()));
 	}
 	
 	public int getGuildId() {
@@ -931,13 +916,42 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public boolean isWearing(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public Equipment getEquipmentForObject(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		return null;
+	}
+	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
+			Vector<Equipment> removeVector = new Vector<Equipment>();
 			for (Equipment equipment : getEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
-					getEquipmentList().remove(equipment);
+				if (equipment.getObjectId() == object.getObjectID()) {
+					//getEquipmentList().remove(equipment);
+					removeVector.add(equipment);
 				}
 			}
+			getEquipmentList().removeAll(removeVector);
 		}
 	}
 	
@@ -1017,7 +1031,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public String getPerformanceType() {
-		return (((boolean) otherVariables.get("performanceType")) ? "dance" : "music");
+		return (String)otherVariables.get("performanceType");
 	}
 	
 	public void setPerformanceType(String performanceType) {
@@ -1153,13 +1167,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public boolean isWearingAppearance(SWGObject object) {
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
+			Vector<Equipment> removeVector = new Vector<Equipment>();
 			for (Equipment equipment : getAppearanceEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
-					getAppearanceEquipmentList().remove(equipment);
+				if (equipment.getObjectId() == object.getObjectID()) {
+					removeVector.add(equipment);
+					//getAppearanceEquipmentList().remove(equipment);
 				}
 			}
+			getAppearanceEquipmentList().removeAll(removeVector);
 		}
 	}
 	
@@ -1312,50 +1339,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public void addCooldown(String cooldownGroup, float cooldownTime) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			cooldowns.remove(cooldownGroup);
-		}
-		
-		long duration = System.currentTimeMillis() + ((long) (cooldownTime * 1000F)); 
-		
-		cooldowns.put(cooldownGroup, duration);
-	}
-	
-	public boolean hasCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return true;
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return false;
-	}
-	
-	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
-		if (cooldowns.containsKey(command.getCooldownGroup())) {
-			cooldowns.remove(command.getCooldownGroup());
-			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup().toLowerCase()), -1)).serialize());
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public long getRemainingCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return 0L;
-	}
-	
 	public int getGCWFatigue() {
 		return (int) otherVariables.get("fatigue");
 	}
@@ -1409,9 +1392,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void sendSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write((new ChatSystemMessage(message, outOfBand, displayType)).serialize());
-		}
+		notifySelf((new ChatSystemMessage(message, outOfBand, displayType)).serialize());
 	}
 	
 	public void playMusic(String sndFile) {
@@ -1431,7 +1412,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
-		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+		notifySelf((new PlayMusicMessage(sndFile, targetId, 1, false)).serialize());
+	}
+	
+	public TangibleObject getInventory() {
+		return (TangibleObject) getSlottedObject("inventory");
+	}
+	
+	public void notifySelf(IoBuffer buffer) {
+		if (getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(buffer);
+		}
 	}
 	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
@@ -1450,6 +1441,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void sendBaselines(Client destination) {	
 		if (destination != null && destination.getSession() != null) {
+			
+			//objectFieldDiagnosis();
+			
 			destination.getSession().write(getBaseline(3).getBaseline());
 			destination.getSession().write(getBaseline(6).getBaseline());
 			if (destination == getClient()) {
@@ -1468,6 +1462,45 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				destination.getSession().write(upm.serialize());
 			}
 		}
+	}
+	
+	// Utility method to check which fields are null
+	public void objectFieldDiagnosis(){
+		System.out.println("Object being diagnosed: " + this.getTemplate() + " Id: " + this.getObjectID());
+		
+		ArrayList<Method> list = new ArrayList<Method>();
+		Method[] methods = this.getClass().getDeclaredMethods();
+	    for (Method method : methods)
+	       if (isGetter(method)){
+	    	   try {
+				Object valueObject = method.invoke(this, (Object[]) null);
+				if (valueObject==null){
+					System.err.println("method " + method.getName() + " delivers null object");
+				}
+			} catch (IllegalAccessException e) {
+				System.err.println("IllegalAccessException during reflection");
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				System.err.println("IllegalArgumentException during reflection");
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				System.err.println("InvocationTargetException during reflection");
+				e.printStackTrace();
+			}
+	    }	  
+	}
+			
+	public static boolean isGetter(Method method) {
+	   if (Modifier.isPublic(method.getModifiers()) &&
+	      method.getParameterTypes().length == 0) {
+	         if (method.getName().matches("^get[A-Z].*") &&
+	            !method.getReturnType().equals(void.class))
+	               return true;
+	         if (method.getName().matches("^is[A-Z].*") &&
+	            method.getReturnType().equals(boolean.class))
+	               return true;
+	   }
+	   return false;
 	}
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
@@ -1490,7 +1523,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			case 6:
 			{
 				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
-				notifyClients(buffer, true);
+				notifyObservers(buffer, true);
 				break;
 			}
 		}

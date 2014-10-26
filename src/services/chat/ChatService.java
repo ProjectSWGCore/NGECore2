@@ -86,15 +86,6 @@ public class ChatService implements INetworkDispatch {
 	
 	public ChatService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCommand("spatialchatinternal");
-		core.commandService.registerCommand("socialinternal");
-		
-		core.commandService.registerCommand("addignore");
-		core.commandService.registerCommand("removeignore");
-		core.commandService.registerCommand("findfriend");
-		core.commandService.registerCommand("addfriend");
-		core.commandService.registerCommand("removefriend");
-
 		core.commandService.registerAlias("g", "groupchat");
 		core.commandService.registerAlias("gc", "groupchat");
 		core.commandService.registerAlias("groupsay", "groupchat");
@@ -105,7 +96,6 @@ public class ChatService implements INetworkDispatch {
 		
 		mailODB = core.getMailODB();
 		chatRoomsODB = core.getChatRoomODB();
-
 	}
 	
 	/*

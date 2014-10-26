@@ -140,6 +140,7 @@ public class StaticService implements INetworkDispatch {
 		}
 		
 		//long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
+		//long objectId = core.objectService.getReusableId();
 		long objectId = 0;
 		SWGObject object = null;
 		

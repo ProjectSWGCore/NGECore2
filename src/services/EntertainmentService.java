@@ -506,35 +506,7 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	private void registerCommands() {
-		core.commandService.registerCommand("bandflourish");
-		core.commandService.registerCommand("flourish");
 		core.commandService.registerAlias("flo","flourish");
-		core.commandService.registerCommand("groupdance");
-		core.commandService.registerCommand("startdance");
-		core.commandService.registerCommand("stopdance");
-		core.commandService.registerCommand("watch");
-		core.commandService.registerCommand("stopwatching");
-		core.commandService.registerCommand("holoEmote");
-		core.commandService.registerCommand("covercharge");
-		//core.commandService.registerCommand("en_holographic_recall");
-		//core.commandService.registerCommand("en_holographic_image");
-		core.commandService.registerCommand("imagedesign");
-		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
-		
-		// Entertainer Effects
-		core.commandService.registerCommand("centerStage");
-		core.commandService.registerCommand("colorSwirl");
-		core.commandService.registerCommand("colorlights");
-		core.commandService.registerCommand("floorLights"); // referred to also as Dance Floor
-		core.commandService.registerCommand("dazzle");
-		core.commandService.registerCommand("distract");
-		core.commandService.registerCommand("featuredSolo");
-		core.commandService.registerCommand("firejet");
-		core.commandService.registerCommand("firejet2");
-		core.commandService.registerCommand("laserShow");
-		core.commandService.registerCommand("smokebomb");
-		core.commandService.registerCommand("spotlight");
-		core.commandService.registerCommand("ventriloquism");
 	}
 	
 	public void giveInspirationBuff(CreatureObject reciever, CreatureObject buffer, Vector<BuffItem> buffVector) {

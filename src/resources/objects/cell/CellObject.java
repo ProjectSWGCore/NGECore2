@@ -94,8 +94,12 @@ public class CellObject extends SWGObject implements Serializable {
 			System.out.println("NULL session [permission]");
 			return;
 		}
+		if (destination.getParent() == null) {
+			System.out.println("NULL parent [sendPermissionMessage]");
+			return;
+		}
 		
-		byte canEnter = (byte) (((BuildingObject) getContainer()).canEnter(destination.parent) ? 1 : 0);
+		byte canEnter = (byte) (((BuildingObject) getContainer()).canEnter(destination.getParent()) ? 1 : 0);
 		destination.getSession().write(new UpdateCellPermissionMessage(canEnter, getObjectID()).serialize());
 
 	}

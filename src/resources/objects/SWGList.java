@@ -233,7 +233,7 @@ public class SWGList<E> extends Delta implements List<E> {
 			int index = list.indexOf(o);
 			
 			if (list.remove(o)) {
-				queue(item(1, index, null, true, false));
+				queue(item(0, index, null, true, false));
 				return true;
 			} else {
 				return false;
@@ -245,7 +245,7 @@ public class SWGList<E> extends Delta implements List<E> {
 		synchronized(objectMutex) {
 			E element = list.remove(index);
 			
-			queue(item(1, index, null, true, false));
+			queue(item(0, index, null, true, false));
 			
 			return (E) element;
 		}
@@ -407,7 +407,15 @@ public class SWGList<E> extends Delta implements List<E> {
 			int size = 0;
 			
 			for (Object o : list) {
+				if (o == null) {
+					System.err.println("ERROR: Null object in SWGList!");
+					continue;
+				}
 				byte[] object = Baseline.toBytes(o);
+				if (object == null) {
+					System.err.println("ERROR: Null Baseline.toBytes in SWGList!");
+					continue;
+				}
 				size += object.length;
 				
 				IoBuffer buffer = createBuffer(size);

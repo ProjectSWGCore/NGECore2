@@ -77,22 +77,22 @@ public class BuffBuilder {
 
 	public void setCategory(String category)
 	{
-		this.catId=BuffCategory.MISC;
-		if(category.equals("attributes"))
-		{
-			this.catId=BuffCategory.ATTRIBUTES;
-		}
-		else if(category.equals("trade"))
-		{
-			this.catId=BuffCategory.TRADE;
-		}
-		else if(category.equals("resistances"))
-		{
-			this.catId=BuffCategory.RESISTANCES;
-		}
-		else if(category.equals("combat"))
-		{
-			this.catId=BuffCategory.COMBAT;
+		
+		switch (category) {
+			case "attributes":
+				this.catId=BuffCategory.ATTRIBUTES;
+				break;
+			case "trade":
+				this.catId=BuffCategory.TRADE;
+				break;
+			case "resistances":
+				this.catId=BuffCategory.RESISTANCES;
+				break;
+			case "combat":
+				this.catId=BuffCategory.COMBAT;
+				break;
+			default:
+				this.catId=BuffCategory.MISC;
 		}
 
 		this.category = category;

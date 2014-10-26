@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("township")
-	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
+	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE)
 		
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_opening_santos.iff')

@@ -150,12 +150,17 @@ public class SUIService implements INetworkDispatch {
 					return;
 				}
 				
+				if (target.getAttachment("conversationFile") != null) {
+					core.scriptService.callScript("scripts/radial/", "object/conversation", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
+				}
+				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
 					return;
 				
 				sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-				
 			}
 			
 		});
@@ -191,6 +196,10 @@ public class SUIService implements INetworkDispatch {
 						return;
 				}
 
+				if (target.getAttachment("conversationFile") != null) {
+					core.scriptService.callScript("scripts/radial/", "object/conversation", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+					return;
+				}
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
 			}

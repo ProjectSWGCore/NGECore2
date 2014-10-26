@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
