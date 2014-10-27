@@ -546,7 +546,19 @@ public class NGECore {
 		
 		// Tutorial Terrains
 		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);
-		terrainService.addPlanet(21, "tutorial", "terrain/tutorial.trn", false);
+		terrainService.addPlanet(21, "tutorial", "terrain/tutorial.trn", true);
+		terrainService.addPlanet(22, "creature_test", "terrain/creature_test.trn", true);
+		terrainService.addPlanet(23, "character_farm", "terrain/character_farm.trn", true);
+		terrainService.addPlanet(24, "cinco_city_test_m5", "terrain/cinco_city_test_m5.trn", false);
+		terrainService.addPlanet(25, "godclient_test", "terrain/godclient_test.trn", false);
+		terrainService.addPlanet(26, "otoh_gunga", "terrain/otoh_gunga.trn", false);
+		terrainService.addPlanet(27, "tanaab", "terrain/tanaab.trn", false);
+		terrainService.addPlanet(28, "watertabletest", "terrain/watertabletest.trn", false);
+		terrainService.addPlanet(29, "umbra", "terrain/umbra.trn", true);
+		terrainService.addPlanet(30, "tusken_raid_encounter", "terrain/tusken_raid_encounter.trn", false);
+		terrainService.addPlanet(31, "space_npe_falcon_3", "terrain/space_npe_falcon_3.trn", false);
+		
+		
 		
 		// 21B
 		// droid

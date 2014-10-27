@@ -260,7 +260,7 @@ public class CharacterService implements INetworkDispatch {
 				// should set to some planet and starting location
 				String sharedRaceTemplate = raceTemplate.replace("player/", "player/shared_");
 				
-				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetByName("tatooine"));
+				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetByName("umbra"));
 				object.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				object.setCustomization(clientCreateCharacter.getCustomizationData());
 				object.setCustomName(clientCreateCharacter.getName());
@@ -272,7 +272,7 @@ public class CharacterService implements INetworkDispatch {
 				if (options != null && options.getInt("DO.ISOLATION.TESTS") > 0){
 					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(0, 0, 0), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				} else {
-					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(151, 25, 153), (float) 0.5, 3, core.terrainService.getPlanetByName("umbra").getID()));
 				}
 				
 				object.setCashCredits(100);
