@@ -208,7 +208,7 @@ def	adminHandler(owner):
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, adminHandlerCallback)
 	window.addListBoxMenuItem('Vehicle', 0)
 	window.addListBoxMenuItem('Crafting', 1)
-	window.addListBoxMenuItem('Character Builder Terminal', 2)
+	window.addListBoxMenuItem('Frog + Travel Terminal', 2)
 	window.addListBoxMenuItem('Placeholder', 3)
 	core.suiService.openSUIWindow(window);
 	
@@ -664,7 +664,9 @@ def vehicleHandler(owner, inventory):
 	
 def cbtHandler(owner, inventory):
 	cbt = core.objectService.createObject('object/tangible/terminal/shared_terminal_character_builder.iff', owner.getPlanet())
+	npe = core.objectService.createObject('object/tangible/terminal/shared_terminal_npe_transition.iff', owner.getPlanet())
 	inventory.add(cbt)
+	inventory.add(npe)
 	screenOne(core, owner)
 	return
 	
