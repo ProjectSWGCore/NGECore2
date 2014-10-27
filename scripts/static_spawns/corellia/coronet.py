@@ -9,32 +9,32 @@ def addPlanetSpawns(core, planet):
 #-Coronet
 	ralMundi = stcSvc.spawnObject('object/mobile/shared_dressed_noble_fat_twilek_male_02.iff', 'corellia', long(0), float(-138.975), float(28), float(-4718.86), float(-0.97), float(0.21))
 	ralMundi.setCustomName2('Ral Mundi')
-	ralMundi.setOptionsBitmask(256)
+	ralMundi.setOptionsBitmask(Options.INVULNERABLE)
 	
 	ioTsomcren = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'corellia', long(0), float(-140.701), float(28), float(-4719.16), float(-0.97), float(0.21))
 	ioTsomcren.setCustomName2('Io Tsomcren')
-	ioTsomcren.setOptionsBitmask(256)
+	ioTsomcren.setOptionsBitmask(Options.INVULNERABLE)
 
 	tarthJax = stcSvc.spawnObject('object/mobile/shared_dressed_binayre_pirate_zabrak_male_01.iff', 'corellia', long(0), float(-137.464), float(28), float(-4718.83), float(-0.97), float(0.21))
 	tarthJax.setCustomName2('Tarth Jaxx')
-	tarthJax.setOptionsBitmask(256)
+	tarthJax.setOptionsBitmask(Options.INVULNERABLE)
 	
 	rebCoord = stcSvc.spawnObject('object/mobile/shared_dressed_rebel_communication_female_01.iff', 'corellia', long(0), float(94.8749), float(28), float(-4519.08), float(-0.97), float(0.21))
 	rebCoord.setCustomName2('Rebel Coordinator')
-	rebCoord.setOptionsBitmask(264)
+	rebCoord.setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE)
 	
 	huntrJavz = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_rodian_hunter_m.iff', 'corellia', long(0), float(-51.79), float(28), float(-4662.65), float(0.11), float(0.21))
 	huntrJavz.setCustomName2('Hunter Javeezo')
-	huntrJavz.setOptionsBitmask(256)	
+	huntrJavz.setOptionsBitmask(Options.INVULNERABLE)	
 
 	dw_heraldRebel = stcSvc.spawnObject('object/mobile/shared_dressed_rebel_general_moncal_male_01.iff', 'corellia', long(0), float(-213.64), float(28), float(-4445.46), float(-0.97), float(0.21))
 	dw_heraldRebel.setCustomName2('Lutin Nightstalker')
-	dw_heraldRebel.setOptionsBitmask(256)
+	dw_heraldRebel.setOptionsBitmask(Options.INVULNERABLE)
 
 #---Coronet-CityHall-interrior
 	brantlee = stcSvc.spawnObject('object/mobile/shared_dressed_brantlee_spondoon.iff', 'corellia', long(1855463), float(-25.7), float(1.3), float(-0.5), float(0.98), float(0.01))
 	#brantlee.setCustomName2('Brantlee Spondoon')
-	#brantlee.setOptionsBitmask(256)
+	#brantlee.setOptionsBitmask(Options.INVULNERABLE)
 	
 	cor_brawlr00 = stcSvc.spawnObject('object/mobile/shared_dressed_brawler_trainer_01.iff', 'corellia', long(1855463), float(-1.7274), float(7.9), float(-32.175), float(0.5), float(0.01))
 	#cor_brawlr00.setCustomName2('a brawler')	
@@ -59,14 +59,14 @@ def addPlanetSpawns(core, planet):
 	
 	galluraHanderin = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_02.iff', 'corellia', long(1855463), float(-6.51554), float(1.303), float(9.6562), float(0.1), float(0.01))
 	#galluraHanderin.setCustomName2('Gallura Handerin')
-	#galluraHanderin.setOptionsBitmask(256)
+	#galluraHanderin.setOptionsBitmask(Options.INVULNERABLE)
 	
 	corsec_agent00 = stcSvc.spawnObject('object/mobile/shared_dressed_corellia_local_corsec_chief.iff', 'corellia', long(1855463), float(-0.332), float(0.3), float(-2.902), float(0.89), float(0.01))
 	#corsec_agent00.setCustomName2('a CorSec Agent')
 	
 	thaleDustrunner = stcSvc.spawnObject('object/mobile/shared_dressed_criminal_smuggler_human_male_01.iff', 'corellia', long(1855463), float(-0.05), float(3.078), float(-10.9388), float(0.99), float(0.11))
 	#thaleDustrunner.setCustomName2('Thale Dustrunner')
-	#thaleDustrunner.setOptionsBitmask(256)
+	#thaleDustrunner.setOptionsBitmask(Options.INVULNERABLE)
 
 #---Coronet-StarPort-interrior
 	cor_btdiplmt00 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_bothan_female_01.iff', 'corellia', long(1855678), float(56.669), float(-0.521137), float(33.7689), float(0.99), float(0.11))
@@ -89,7 +89,7 @@ def addPlanetSpawns(core, planet):
 
 	jessbConvorr = stcSvc.spawnObject('object/mobile/shared_dressed_corellia_jesseb_convorr.iff', 'corellia', long(1855684), float(50.2), float(1.0), float(20.1), float(-0.47), float(0.21))
 	#jessbConvorr.setCustomName2('Jesseb Convorr')
-	#jessbConvorr.setOptionsBitmask(256)
+	#jessbConvorr.setOptionsBitmask(Options.INVULNERABLE)
 	
 	cor_merc00 = stcSvc.spawnObject('object/mobile/shared_dressed_mercenary_strong_hum_m.iff', 'corellia', long(1855683), float(-62.767), float(2.6394), float(41.76), float(0.99), float(0.11))
 	#cor_merc00.setCustomName2('a mercenary')	
@@ -106,20 +106,20 @@ def addPlanetSpawns(core, planet):
 #-Coronet-Legacy NPCs
 	stregand = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_bith_male_01.iff', 'corellia', long(0), float(-33), float(28), float(-4424), float(0.67), float(0.21))
 	stregand.setCustomName2('Stregand')
-	stregand.setOptionsBitmask(256)
+	stregand.setOptionsBitmask(Options.INVULNERABLE)
 	
 	borgan = stcSvc.spawnObject('object/creature/npc/base/shared_whiphid_base_male.iff', 'corellia', long(0), float(-34.4), float(28), float(-4418.2), float(0.75), float(0.21))
 	borgan.setCustomName2('Borgan')
-	borgan.setOptionsBitmask(256)
+	borgan.setOptionsBitmask(Options.INVULNERABLE)
 	
 	#Lt. Joth - wrong appearance - looking for a bearded guy with BLUE CorSec Jacket
 	ltJoth = stcSvc.spawnObject('object/mobile/shared_dressed_corellia_cec_officer.iff', 'corellia', long(0), float(-283), float(28), float(-4697), float(0.07), float(0.11))
 	ltJoth.setCustomName2('Lieutenant Joth')
-	ltJoth.setOptionsBitmask(256)
+	ltJoth.setOptionsBitmask(Options.INVULNERABLE)
 	
 	mackJasper = stcSvc.spawnObject('object/mobile/shared_dressed_corsec_officer_human_male_01.iff', 'corellia', long(0), float(-68.2), float(28), float(-4631.8), float(-0.97), float(0.21))
 	mackJasper.setCustomName2('Lieutenant Mack Jasper')
-	mackJasper.setOptionsBitmask(256)
+	mackJasper.setOptionsBitmask(Options.INVULNERABLE)
 	
 #-Coronet Misc NPCS
 	#Profession Counselor

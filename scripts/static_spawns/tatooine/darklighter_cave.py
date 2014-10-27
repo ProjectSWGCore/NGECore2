@@ -19,7 +19,7 @@ def addPlanetSpawns(core, planet):
 	
 	lifter = stcSvc.spawnObject('object/mobile/shared_cll8_binary_load_lifter.iff', 'tatooine', cave.getCellByCellNumber(2), float(8.8), float(-21.8), float(-38.1), float(0.71), float(0), float(0.70), float(0))	
 	lifter.setCustomName('a Binary Load Lifter')
-	lifter.setOptionsBitmask(256)
+	lifter.setOptionsBitmask(Options.INVULNERABLE)
 
 	stcSvc.spawnObject('desert_demon_brawler', 'tatooine', cave.getCellByCellNumber(4), float(-34.7), float(-49.1), float(-109.5), float(0.71), float(0), float(0.70), float(0))
 	

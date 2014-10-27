@@ -96,7 +96,7 @@ def addPlanetSpawns(core, planet):
 	hermit = stcSvc.spawnObject('object/mobile/shared_dressed_hermit_of_tatooine.iff', 'tatooine', cave.getCellByCellNumber(27), float(38.2), float(-69.1), float(-103.1), float(-0.75), float(0), float(-0.65), float(0))
 	#hermit.setCustomName('quest_hero_of_tatooine_hermit')
 	hermit.setCustomName('a Hermit')
-	hermit.setOptionsBitmask(256)
+	hermit.setOptionsBitmask(Options.INVULNERABLE)
 		
 	
 
