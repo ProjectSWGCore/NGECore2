@@ -1763,6 +1763,7 @@ public class ObjectService implements INetworkDispatch {
 		synchronized(persistentBuildings) {
 			for(BuildingObject building : persistentBuildings) {
 				building.setAttachment("buildoutBuilding", true);
+				core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
 				//core.getSWGObjectODB().put(building.getObjectID(), building);
 				//destroyObject(building);
 			}
