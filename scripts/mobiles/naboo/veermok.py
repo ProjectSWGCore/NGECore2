@@ -11,9 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('veermok')
-	mobileTemplate.setLevel(18)
-	mobileTemplate.setMinLevel(18)
-	mobileTemplate.setMaxLevel(26)
+	mobileTemplate.setLevel(13)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -26,10 +24,10 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(150)
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(60)
-	mobileTemplate.setSocialGroup("veermok")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setSocialGroup("self")
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_veermok.iff')
@@ -41,6 +39,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_2')
+	attacks.add('bm_stomp_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

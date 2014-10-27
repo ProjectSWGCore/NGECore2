@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('narglatch')
 	mobileTemplate.setLevel(21)
-	mobileTemplate.setMinLevel(21)
-	mobileTemplate.setMaxLevel(23)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,8 +25,8 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(40)
 	mobileTemplate.setSocialGroup("narglatch")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setAssistRange(2)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
@@ -41,6 +39,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_2')
+	attacks.add('bm_slash_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
