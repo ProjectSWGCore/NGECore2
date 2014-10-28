@@ -10,27 +10,25 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCustomName('A gurk')
-	mobileTemplate.setLevel(79)
-	mobileTemplate.setMinLevel(79)
-	mobileTemplate.setMaxLevel(80)
+	mobileTemplate.setCreatureName('young_spined_snake')			
+	mobileTemplate.setLevel(47)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(1450)
+	mobileTemplate.setMeatType("Reptilian Meat")
+	mobileTemplate.setMeatAmount(7)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(1350)
-	mobileTemplate.setSocialGroup("kimogila")
-	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setHideAmount(4)
+	mobileTemplate.setSocialGroup("self")
+	mobileTemplate.setAssistRange(8)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_voritor_dasher.iff')
+	templates.add('object/mobile/shared_young_spined_snake.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -39,8 +37,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_damage_poison_3')
+	attacks.add('bm_defensive_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('lok_gurk', mobileTemplate)
+	core.spawnService.addMobileTemplate('young_spined_snake', mobileTemplate)
 	return
