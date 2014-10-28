@@ -16,9 +16,9 @@ def addDynamicGroup(core):
 	mobileTemplates.add('singing_mtn_clan_scout')
 	mobileTemplates.add('singing_mtn_clan_slave')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(-5)
-	dynamicGroup.setName('smc_dyn_1')
+	dynamicGroup.setGroupMembersNumber(3)
+	dynamicGroup.setName('dathomir_smc')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(60)
-	core.spawnService.addDynamicGroup('smc_dyn_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dathomir_smc', dynamicGroup)
 	return
