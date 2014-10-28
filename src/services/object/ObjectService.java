@@ -784,32 +784,27 @@ public class ObjectService implements INetworkDispatch {
 			
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
 			object.viewChildren(object, true, true, (child) -> instantiateChild(child));
-		}
-		
-		/* Diagnostic part */
-//		System.out.println("Creo : " + object.getCustomName()); 
-//		System.out.println("Creo ID : " + object.getObjectID()); 
-//		System.out.println("Equipment List : " + object.getEquipmentList().size());
-		/* Diagnostic part */
-		
-		SWGList<Equipment> eqList = object.getEquipmentList();
-		List<Equipment> delList = new ArrayList<Equipment>();
-		for (Equipment eq :eqList){
-//			System.out.println("Equipment getObjectID() " + eq.getObjectId());
-//			System.out.println("Equipment Class " + eq.getObject().getClass()); -> NPE
-//			System.out.println("Equipment Name " + eq.getObject().getCustomName()); -> NPE
-//			System.out.println("Equipment Template " + eq.getObject().getTemplate()); -> NPE
+			/* Diagnostic part */
+//			System.out.println("Creo : " + object.getCustomName()); 
+//			System.out.println("Creo ID : " + object.getObjectID()); 
+//			System.out.println("Equipment List : " + object.getEquipmentList().size());
+			/* Diagnostic part */
 			
-			if(! checkIfObjectAlreadyInList(eq.getObjectId()))
-				delList.add(eq);
-		}
-		
-		
-		eqList.removeAll(delList); // The persisted equipment list contains objects that do not exist anymore, merely a hotfix really
-		object.getEquipmentList().clear();
-		object.getEquipmentList().addAll(eqList);
+			SWGList<Equipment> eqList = object.getEquipmentList();
+			List<Equipment> delList = new ArrayList<Equipment>();
+			for (Equipment eq : eqList){
+//				System.out.println("Equipment getObjectID() " + eq.getObjectId());
+//				System.out.println("Equipment Class " + eq.getObject().getClass()); -> NPE
+//				System.out.println("Equipment Name " + eq.getObject().getCustomName()); -> NPE
+//				System.out.println("Equipment Template " + eq.getObject().getTemplate()); -> NPE
 				
-		return (CreatureObject) object;
+				if (!checkIfObjectAlreadyInList(eq.getObjectId()))
+					delList.add(eq);
+			}
+			
+			eqList.removeAll(delList); // The persisted equipment list contains objects that do not exist anymore, merely a hotfix really
+		}
+		return object;
 	}
 	
 	public void instantiateChild(SWGObject child) {
