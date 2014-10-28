@@ -145,7 +145,7 @@ def belavistalTravel(owner):
 	return
 	
 def korvellaTravel(owner):
-	position = Point3D(-3775, 86, -3234)
+	position = Point3D(-3775, 86, 3234)
 	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("corellia"), position, owner.getOrientation(), None)
 	return
 
