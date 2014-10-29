@@ -37,7 +37,6 @@ def run(core, actor, target, commandString):
     actorID = actor.getObjectID()
     commandArgs = commandString.split(" ")
     commandLength = len(commandArgs)
-    bankSurcharge = int(math.ceil(0.05 * float(tipAmount))) # Accurate tipping tax - prevents floating point error
     
     # Determine type of tip
     if not commandArgs[0].isdigit():
@@ -61,6 +60,8 @@ def run(core, actor, target, commandString):
             else:
                 actor.sendSystemMessage('Unrecognized tip command', 0)
                 return
+
+    bankSurcharge = int(math.ceil(0.05 * float(tipAmount))) # Accurate tipping tax - prevents floating point error
     
     
     #/tip int || /tip target int
