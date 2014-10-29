@@ -1,4 +1,6 @@
+from resources.objects.creature import CreatureObject
 from java.util import Date
+from engine.resources.objects import SWGObject
 from services.chat import ChatService
 from services.chat import Mail
 from services.sui import SUIWindow
@@ -8,6 +10,7 @@ from services.sui.SUIService import MessageBoxType
 from java.util import Vector
 from main import NGECore
 import sys
+import math
 
 # initialize global vars (happens at compile time)
 commandArgs = ""
@@ -15,7 +18,6 @@ commandLength = 0
 actorID = long(0)
 targetID = long(0)
 tipAmount = 0
-tipAmountBank = 0
 bankSurcharge = 0
 
 
@@ -30,16 +32,36 @@ def run(core, actor, target, commandString):
     global commandArgs
     global commandLength
     global tipAmount
-    global tipAmountBank
     global bankSurcharge
-
+    
     actorID = actor.getObjectID()
-    targetID = target.getObjectID()
     commandArgs = commandString.split(" ")
     commandLength = len(commandArgs)
-    tipAmount = commandArgs[0]
-    tipAmountBank = commandArgs[0]
-    bankSurcharge = int(0.05) * int(tipAmountBank)
+    
+    # Determine type of tip
+    if not commandArgs[0].isdigit():
+        tipAmount = int(commandArgs[1])
+        bankSurcharge = int(math.ceil(0.05 * float(tipAmount))) # Accurate tipping tax - prevents floating point error
+        targetID = core.chatService.getObjectByFirstName(commandArgs[0]).getObjectID();
+        if isinstance(commandArgs[2], basestring):
+            if not commandArgs[2].lower() == "bank":
+                actor.sendSystemMessage('Unrecognized tip command', 0)
+                return
+        else:
+            actor.sendSystemMessage('Unrecognized tip command', 0)
+            return
+    else: 
+        tipAmount = int(commandArgs[0])
+        bankSurcharge = int(math.ceil(0.05 * float(tipAmount)))
+        targetID = target.getObjectID()
+        if commandLength > 1:
+            if isinstance(commandArgs[1], basestring):
+                if not commandArgs[1].lower() == "bank":
+                    actor.sendSystemMessage('Unrecognized tip command', 0)
+                    return
+            else:
+                actor.sendSystemMessage('Unrecognized tip command', 0)
+                return
     
     
     #/tip int || /tip target int
@@ -52,8 +74,8 @@ def run(core, actor, target, commandString):
         if (actor.inRange(target.getPosition(), 100)): # 100 = 10m
             if int(tipAmount) > 0 and int(tipAmount) <= 1000000:
                 if actorFunds >= int(tipAmount):
-                    currentTarget.setCashCredits(int(tipAmount))       
-                    actor.setCashCredits(actorFunds - int(tipAmount))
+                    currentTarget.addCashCredits(int(tipAmount))  
+                    actor.deductCashCredits(int(tipAmount))
 
                     currentTarget.sendSystemMessage(actor.getCustomName() + ' tips you ' + tipAmount + ' credits.', 0)
                     actor.sendSystemMessage('You successfully tip ' + tipAmount + ' credits to ' + currentTarget.getCustomName() + '.', 0)
@@ -66,7 +88,7 @@ def run(core, actor, target, commandString):
         return
     
     #/tip target 30000000 bank
-    if commandLength == 2:
+    if commandLength >= 2:
         suiSvc = core.suiService
         suiWindow = suiSvc.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@base_player:tip_wire_title", "@base_player:tip_wire_prompt", actor, actor, 10)
         
@@ -80,13 +102,20 @@ def run(core, actor, target, commandString):
         return
     return
 
-def handleBankTip(owner, window, eventType, returnList):
+def handleBankTip(core, owner, eventType, returnList):
     core = NGECore.getInstance()
     chatSvc = core.chatService
     actorGlobal = core.objectService.getObject(actorID)
-    targetGlobal = core.objectService.getObject(targetID)
+    targetGlobal = 0
+    
+    #We need to determine how the tip is being delivered, either by /tip 1000 bank (targeted) or /tip name 1000 bank
+    if not commandArgs[0].isdigit():
+        targetGlobal = core.chatService.getObjectByFirstName(commandArgs[0]);
+    else:
+        targetGlobal = core.objectService.getObject(targetID)
     actorFunds = actorGlobal.getBankCredits()
-    totalLost = int(tipAmountBank) + bankSurcharge
+    totalLost = int(tipAmount) + bankSurcharge
+    
     
     if eventType == 0:
         if int(totalLost) > actorFunds:
@@ -101,7 +130,7 @@ def handleBankTip(owner, window, eventType, returnList):
             targetMail.setTimeStamp((int) (date.getTime() / 1000))
             targetMail.setRecieverId(targetID)
             targetMail.setStatus(Mail.NEW)
-            targetMail.setMessage(tipAmount + ' credits from ' + actorGlobal.getCustomName() + ' have been successfully delivered from escrow to your bank account')
+            targetMail.setMessage(`tipAmount` + ' credits from ' + actorGlobal.getCustomName() + ' have been successfully delivered from escrow to your bank account')
             targetMail.setSubject('@base_player:wire_mail_subject')
             targetMail.setSenderName('bank')
 
@@ -110,15 +139,14 @@ def handleBankTip(owner, window, eventType, returnList):
             actorMail.setRecieverId(actorID)
             actorMail.setStatus(Mail.NEW)
             actorMail.setTimeStamp((int) (date.getTime() / 1000))
-            actorMail.setMessage('An amount of ' + tipAmount + ' credits have been transfered from your bank to escrow. It will be delivered to ' + 
-                             targetGlobal.getCustomName() + ' as soon as possible.')
+            actorMail.setMessage('An amount of ' + `tipAmount` + ' credits have been transfered from your bank to escrow. It will be delivered to ' + targetGlobal.getCustomName() + ' as soon as possible.')
             actorMail.setSubject('@base_player:wire_mail_subject')
             actorMail.setSenderName('bank')
             
-            targetGlobal.setBankCredits(int(tipAmount) + int(targetGlobal.getBankCredits()))
-            actorGlobal.setBankCredits(int(actorFunds) - int(totalLost))
-            actorGlobal.sendSystemMessage('You have successfully sent ' + tipAmount + ' bank credits to ' + targetGlobal.getCustomName(), 0)
-            targetGlobal.sendSystemMessage('You have successfully received ' + tipAmount + ' bank credits from ' + actorGlobal.getCustomName(), 0)
+            targetGlobal.addBankCredits(int(tipAmount))
+            actorGlobal.deductBankCredits(int(totalLost))
+            actorGlobal.sendSystemMessage('You have successfully sent ' + `tipAmount` + ' bank credits to ' + targetGlobal.getCustomName(), 0)
+            targetGlobal.sendSystemMessage('You have successfully received ' + `tipAmount` + ' bank credits from ' + actorGlobal.getCustomName(), 0)
             
             chatSvc.storePersistentMessage(actorMail)
             chatSvc.storePersistentMessage(targetMail)
@@ -127,6 +155,6 @@ def handleBankTip(owner, window, eventType, returnList):
             return
         
     else:
-        actorGlobal.sendSystemMessage('You lack the bank funds to wire ' + tipAmount + ' bank funds to ' + targetGlobal.getCustomName() + '.', 0)
+        actorGlobal.sendSystemMessage('You lack the bank funds to wire ' + `tipAmount` + ' bank funds to ' + targetGlobal.getCustomName() + '.', 0)
         return
     return
