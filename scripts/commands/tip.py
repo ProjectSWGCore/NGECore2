@@ -33,15 +33,15 @@ def run(core, actor, target, commandString):
     global commandLength
     global tipAmount
     global bankSurcharge
-    
+
     actorID = actor.getObjectID()
     commandArgs = commandString.split(" ")
     commandLength = len(commandArgs)
+    bankSurcharge = int(math.ceil(0.05 * float(tipAmount))) # Accurate tipping tax - prevents floating point error
     
     # Determine type of tip
     if not commandArgs[0].isdigit():
         tipAmount = int(commandArgs[1])
-        bankSurcharge = int(math.ceil(0.05 * float(tipAmount))) # Accurate tipping tax - prevents floating point error
         targetID = core.chatService.getObjectByFirstName(commandArgs[0]).getObjectID();
         if isinstance(commandArgs[2], basestring):
             if not commandArgs[2].lower() == "bank":
@@ -52,7 +52,6 @@ def run(core, actor, target, commandString):
             return
     else: 
         tipAmount = int(commandArgs[0])
-        bankSurcharge = int(math.ceil(0.05 * float(tipAmount)))
         targetID = target.getObjectID()
         if commandLength > 1:
             if isinstance(commandArgs[1], basestring):
