@@ -109,8 +109,7 @@ public class EquipmentService implements INetworkDispatch {
 				func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 			}
 			
-			processItemAtrributes(actor, item, true);
-			
+				
 			if (replacedEquipment.size() > 0) {
 				actor.getEquipmentList().removeAll(replacedEquipment);
 			}
@@ -120,6 +119,8 @@ public class EquipmentService implements INetworkDispatch {
 			if (item instanceof WeaponObject) {
 				actor.setWeaponId(item.getObjectID());
 			}
+			
+			processItemAtrributes(actor, item, true);//FIXME: If item bonuses stop working this might need to be moved back to the line before "actor.addObjectToEquipList(item);"
 		}
 	}
 	
@@ -143,9 +144,9 @@ public class EquipmentService implements INetworkDispatch {
 				func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 			}
 			
-			processItemAtrributes(actor, item, false);
-			
 			actor.removeObjectFromEquipList(item);
+			
+			processItemAtrributes(actor, item, false);//FIXME: If item bonuses stop working this might need to be moved back to the line before "actor.removeObjectFromEquipList(item);" 
 		}
 	}
 	
