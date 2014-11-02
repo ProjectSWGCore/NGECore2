@@ -323,25 +323,12 @@ public class SkillService implements INetworkDispatch {
 
 			SetProfessionTemplate profTemplate = new SetProfessionTemplate();
 			profTemplate.deserialize(buffer);
-			String profession = profTemplate.getProfession();
+			CreatureObject creature = (CreatureObject) core.objectService.getObject(profTemplate.getCharacterId());
 			
-			Client client = core.getClient(session);
-			if(client == null) {
-				System.out.println("NULL Client");
-				return;
-			}
-
-			if(client.getParent() == null)
+			if (!creature.getClient().getSession().equals(session))
 				return;
 			
-			CreatureObject creature = (CreatureObject) client.getParent();
-			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-			
-			//System.out.println(profession);
-			if(player == null || player.getProfession().equals(profession) || profession == null)
-				return;
-			
-			core.playerService.respec(creature, profession);
+			core.playerService.respec(creature, profTemplate.getProfession());
 
 		});
 		

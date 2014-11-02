@@ -31,7 +31,7 @@ def addPlanetSpawns(core, planet):
 	
 	#1st room
 	wt_reciptionist = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_wh_receptionist.iff', 'tatooine', wt_bunker.getCellByCellNumber(5), float(-0.3), float(-12), float(34.4), float(0), float(0), float(0), float(0))
-	wt_reciptionist.setOptionsBitmask(256)
+	wt_reciptionist.setOptionsBitmask(Options.INVULNERABLE)
 	wt_reciptionist.setCustomName('White Thranta Reciptionist')
 	
 	wt_guard8 = stcSvc.spawnObject('white_thranta_security_guard', 'tatooine', wt_bunker.getCellByCellNumber(5), float(8.9), float(-12), float(50.8), float(0), float(0), float(0), float(0), 45)
@@ -84,26 +84,26 @@ def addPlanetSpawns(core, planet):
 
 	prisoner = stcSvc.spawnObject('object/mobile/shared_bothan_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-40.5), float(-12), float(130.8), float(-0.700), float(0), float(0.713), float(0))
 	prisoner.setCustomName('Carkufluv Reoslav\'Kre')
-	prisoner.setOptionsBitmask(256)
+	prisoner.setOptionsBitmask(Options.INVULNERABLE)
 	
 	prisoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_rodian_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-43), float(-12), float(133.9), float(0.737), float(0), float(-0.676), float(0))
 	prisoner1.setCustomName('Basse Crestinglighter')
-	prisoner1.setOptionsBitmask(256)
+	prisoner1.setOptionsBitmask(Options.INVULNERABLE)
 	prisoner1.setPosture(Posture.KnockedDown)
 	
 	prisoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_fancy_human_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-33.3), float(-12), float(137.9), float(0), float(0), float(1), float(0))
 	prisoner2.setCustomName('Setweoko I\'tvo')
-	prisoner2.setOptionsBitmask(256)
+	prisoner2.setOptionsBitmask(Options.INVULNERABLE)
 	prisoner2.setPosture(Posture.KnockedDown)
 	
 	prisoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-30), float(-12), float(133.1), float(0.713), float(0), float(0.701), float(0))
 	prisoner3.setCustomName('Itzoosko')
-	prisoner3.setOptionsBitmask(256)
+	prisoner3.setOptionsBitmask(Options.INVULNERABLE)
 	prisoner3.setPosture(Posture.KnockedDown)
 	
 	prisoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_twilek_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-36), float(-12), float(129.9), float(0.994), float(0), float(0.105), float(0))
 	prisoner4.setCustomName('Ogavi Stibi')
-	prisoner4.setOptionsBitmask(256)
+	prisoner4.setOptionsBitmask(Options.INVULNERABLE)
 	
 	durr = stcSvc.spawnObject('durr_rodak', 'tatooine', wt_bunker.getCellByCellNumber(29), float(-153.7), float(-44), float(97.8), float(0), float(0), float(0), float(0), 45)
 	

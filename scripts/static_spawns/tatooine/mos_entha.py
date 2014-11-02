@@ -17,9 +17,11 @@ def addPlanetSpawns(core, planet):
 	
 	#Outside
 	ankwee = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_entha_ankwee.iff', 'tatooine', long(0), float(1351), float(5.0), float(3108), float(0.42), float(0.91))
-	ankwee.setCustomName2('An\'kwee')
-	ankwee.setOptionsBitmask(256)
+	ankwee.setCustomName('An\'kwee')
+	ankwee.setOptionsBitmask(Options.INVULNERABLE)
 	
+	sarlin = stcSvc.spawnObject('sarlin', 'tatooine', long(0), float(1537), float(7), float(3052), float(0.6), float(0.8))
+
 	#Junkdealer
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2919), float(0), float(0))
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2960), float(1), float(0))

@@ -64,6 +64,7 @@ odb/auction/je.info.*
 odb/swgobjects/je.info.*
 odb/bounties/je.info.*
 odb/cities/je.info.*
+odb/reusableIds/je.info.*
 
 # External tool builders
 .externalToolBuilders/
@@ -219,3 +220,6 @@ pip-log.txt
 ## PyCharm
 #############
 .idea
+
+# The config should be example only
+nge.cfg

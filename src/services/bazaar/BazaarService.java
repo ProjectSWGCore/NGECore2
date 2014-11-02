@@ -93,7 +93,6 @@ public class BazaarService implements INetworkDispatch {
 
 	public BazaarService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCommand("createvendor");
 		loadAuctionItems();
 	}
 	
@@ -332,7 +331,7 @@ public class BazaarService implements INetworkDispatch {
 			if(vendor == null || item == null || item instanceof CreatureObject || item instanceof BuildingObject)
 				return;
 
-			addAuction((CreatureObject) player, item, vendor, createAuction.getPrice(), createAuction.getDuration(), createAuction.getDescription(), true, createAuction.getPremium());
+			addAuction((CreatureObject) player, item, vendor, createAuction.getPrice(), createAuction.getDuration(), createAuction.getDescription(), true, createAuction.isPremium());
 			
 		});
 
@@ -360,7 +359,7 @@ public class BazaarService implements INetworkDispatch {
 			if(vendor == null || item == null || item instanceof CreatureObject || item instanceof BuildingObject)
 				return;
 			
-			addAuction((CreatureObject) player, item, vendor, createAuction.getPrice(), createAuction.getDuration(), createAuction.getDescription(), false, createAuction.getPremium());
+			addAuction((CreatureObject) player, item, vendor, createAuction.getPrice(), createAuction.getDuration(), createAuction.getDescription(), false, createAuction.isPremium());
 
 		});
 		

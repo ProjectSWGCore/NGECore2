@@ -24,8 +24,8 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_hiddendaggers_pilot_f_01.iff')
-	templates.add('object/mobile/shared_dressed_hiddendaggers_pilot_m_01.iff')
+	templates.add('object/mobile/shared_dressed_hiddendagger_pilot_f_01.iff')
+	templates.add('object/mobile/shared_dressed_hiddendagger_pilot_m_01.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

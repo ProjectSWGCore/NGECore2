@@ -11,9 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('hermit_spider')
-	mobileTemplate.setLevel(33)
-	mobileTemplate.setMinLevel(33)
-	mobileTemplate.setMaxLevel(35)
+	mobileTemplate.setLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -22,10 +20,10 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Insect Meat")
 	mobileTemplate.setMeatAmount(60)
-	mobileTemplate.setSocialGroup("hermit spider")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setSocialGroup("self")
+	mobileTemplate.setAssistRange(2)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_hermit_spider.iff')
@@ -37,6 +35,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_damage_poison_2')
+	attacks.add('bm_defensive_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -11,9 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate.setLevel(11)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -26,10 +24,10 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(85)
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(70)
-	mobileTemplate.setSocialGroup("kaadu")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setSocialGroup("self")
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_kaadu.iff')
@@ -41,6 +39,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_claw_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

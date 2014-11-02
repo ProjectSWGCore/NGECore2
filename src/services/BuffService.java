@@ -71,8 +71,6 @@ public class BuffService implements INetworkDispatch {
 	
 	public BuffService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCommand("removeBuff");
-		
 		loadBuffs();
 	}
 
@@ -224,7 +222,8 @@ public class BuffService implements INetworkDispatch {
 				public void run() {
 					
 					try {
-						removeBuffFromCreature(target, buff);
+						if (target!=null && buff != null)
+							removeBuffFromCreature(target, buff);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -243,10 +242,12 @@ public class BuffService implements INetworkDispatch {
 				public void run() {
 					try {
 						if (buffer == null  || buffer.getClient() == null)
-							removeBuffFromCreature(target, buff);
+							if (target!=null && buff != null)
+								removeBuffFromCreature(target, buff);
 	
 						if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
-							removeBuffFromCreature(target, buff);
+							if (target!=null && buff != null)
+								removeBuffFromCreature(target, buff);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -388,7 +389,8 @@ public class BuffService implements INetworkDispatch {
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				ScheduledFuture<?> task = scheduler.schedule(() -> {
 					try {
-						removeBuffFromCreature(creature, buff);
+						if (creature!=null && buff != null)
+							removeBuffFromCreature(creature, buff);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

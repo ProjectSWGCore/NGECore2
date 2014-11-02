@@ -132,56 +132,7 @@ public class SimulationService implements INetworkDispatch {
 			collidableQuadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<AbstractCollidable>(-8192, -8192, 8192, 8192));
 		}
 		
-		core.commandService.registerCommand("opencontainer");
-		core.commandService.registerCommand("transferitem");
-		core.commandService.registerCommand("transferitemarmor");
-		core.commandService.registerCommand("transferitemweapon");
-		core.commandService.registerCommand("transferitemmisc");
-		core.commandService.registerCommand("equip");
-		core.commandService.registerCommand("prone");
-		core.commandService.registerCommand("stand");
-		core.commandService.registerCommand("sitserver");
-		core.commandService.registerCommand("kneel");
-		core.commandService.registerCommand("serverdestroyobject");
-		core.commandService.registerGmCommand("giveitem");
-		core.commandService.registerGmCommand("object");
-		core.commandService.registerCommand("getattributesbatch");
-		core.commandService.registerCommand("pvp");
-		core.commandService.registerCommand("setcurrentskilltitle");
-		core.commandService.registerCommand("tip");
-		core.commandService.registerCommand("faction");
-		core.commandService.registerGmCommand("setspeed");
-		core.commandService.registerCommand("waypoint");
-		core.commandService.registerCommand("setwaypointactivestatus");
-		core.commandService.registerCommand("setwaypointname");
-		core.commandService.registerCommand("getfriendlist");
-		core.commandService.registerCommand("deathblow");
-		core.commandService.registerCommand("endduel");
-		core.commandService.registerCommand("duel");
-		core.commandService.registerCommand("purchaseticket");
-		core.commandService.registerCommand("boardshuttle");
-		core.commandService.registerCommand("getplayerid");
-		core.commandService.registerCommand("inspire");
-		core.commandService.registerGmCommand("setgodmode");
-		core.commandService.registerCommand("requestwaypointatposition");
-		core.commandService.registerCommand("meditate");
-		core.commandService.registerGmCommand("server");
-		core.commandService.registerCommand("toggleawayfromkeyboard");
-		core.commandService.registerCommand("lfg");
-		core.commandService.registerCommand("newbiehelper");
-		core.commandService.registerCommand("roleplay");
 		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
-		core.commandService.registerCommand("toggledisplayingfactionrank");
-		core.commandService.registerCommand("editbiography");
-		core.commandService.registerCommand("setbiography");
-		core.commandService.registerCommand("requestbiography");
-		core.commandService.registerCommand("eject");
-		core.commandService.registerGmCommand("broadcast");
-		core.commandService.registerGmCommand("teleporttarget");
-		core.commandService.registerGmCommand("getplayerid");
-		core.commandService.registerCommand("npcconversationselect");
-		core.commandService.registerCommand("npcconversationstop");
-
 	}
 	
 	public void insertSnapShotObjects() {
@@ -241,6 +192,7 @@ public class SimulationService implements INetworkDispatch {
 			if(notifyObservers) {
 				Point3D pos = new Point3D(x, 0, z);
 				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, z, 512);
+				cleanAwareObjects(newAwareObjects); // Only objects that are in objectList are considered!!!
 				for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 					SWGObject obj = it.next();
 					if((obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200) || obj == object)
@@ -251,10 +203,24 @@ public class SimulationService implements INetworkDispatch {
 						object.makeAware(obj);
 					if(obj.getClient() != null)
 						obj.makeAware(object);
+					
+//					if (object.getTemplate().contains("dressed_eisley_officer"))
+//						System.out.println("ME quadtree add!");
 				}
 			}
 		}
 		return success;
+	}
+	
+	public void cleanAwareObjects(Collection<SWGObject> newAwareObjects){
+		Collection<SWGObject> cleanUpObjects = new ArrayList<SWGObject>();
+		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
+			SWGObject obj = it.next();
+			SWGObject objInList = NGECore.getInstance().objectService.getObject(obj.getObjectID());
+			if (objInList==null)
+				cleanUpObjects.add(obj);				
+		}
+		newAwareObjects.removeAll(cleanUpObjects);
 	}
 	
 	public void addChildObjects(SWGObject object, Vector<SWGObject> childObjects) {
@@ -496,6 +462,26 @@ public class SimulationService implements INetworkDispatch {
 				Client observerClient = it.next();
 				if(observerClient.getParent() != null) {
 					observerClient.getParent().makeUnaware(object);
+
+					// Experimental until engine fixed
+					if (observerClient.getParent().getAwareObjects().contains(object)){
+						
+						object.viewChildren(observerClient.getParent(), false, false, new Traverser() {
+							@Override
+							public void process(SWGObject object) {
+								if(object == null)
+									return;
+								if(object.getClient() != null)
+									object.makeUnaware(observerClient.getParent());
+								observerClient.getParent().makeUnaware(object);
+							}
+							});
+							if(!object.isInSnapshot())
+								object.sendDestroy(observerClient);
+							object.removeObserver(observerClient.getParent());
+							observerClient.getParent().getAwareObjects().remove(object);						
+					}
+					// Experimental until engine fixed
 				}
 			}
 		}
@@ -528,6 +514,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject creature = (CreatureObject) client.getParent();
+				if (creature.getPosture()==Posture.Dead || creature.getPosture()==Posture.Incapacitated)
+					return;
 				
 				CreatureObject object = creature;
 				
@@ -695,6 +683,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject object = (CreatureObject) client.getParent();
+				if (object.getPosture()==Posture.Dead || object.getPosture()==Posture.Incapacitated)
+					return;
 				
 				if (core.mountService.isMounted(object)) {
 					object.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
@@ -854,6 +844,12 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(Float.isNaN(newPosition.x) || Float.isNaN(newPosition.y) || Float.isNaN(newPosition.z))
 			return;
+		
+		if (object instanceof CreatureObject){
+			CreatureObject cre = (CreatureObject) object;
+			if (cre.getPosture()==Posture.Dead || cre.getPosture()==Posture.Incapacitated)
+				return;
+		}
 
 		if(cell == null) {
 			

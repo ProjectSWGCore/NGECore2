@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -49,6 +50,7 @@ import resources.common.*;
 import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.equipment.Equipment;
 import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
@@ -106,6 +108,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.objectives.BountyMissionObjective;
+import resources.objects.SWGList;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.craft.DraftSchematic;
@@ -144,6 +147,9 @@ public class ObjectService implements INetworkDispatch {
 
 	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
 	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
+	private Map<Long, List<CellObject>> cellMap = new HashMap<Long, List<CellObject>>();
+	private Map<Long, BuildingObject> buildingMap = new HashMap<Long, BuildingObject>();
+	private List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -152,6 +158,10 @@ public class ObjectService implements INetworkDispatch {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	protected final Object objectMutex = new Object();
 	private List<Runnable> loadServerTemplateTasks = Collections.synchronizedList(new ArrayList<Runnable>());
+	private int iteratedReusedIds = 0;
+	private List<Long> reusableIds = Collections.synchronizedList(new ArrayList<Long>());
+	
+	private boolean buildoutDEBUG = false;
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -202,7 +212,18 @@ public class ObjectService implements INetworkDispatch {
 				objectList.put(object.getObjectID(), object);
 		}
 		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
+		cursor = core.getReusableIdODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			reusableIds.add(((ObjectId) cursor.next()).objectId);
+		}
+		
 		loadBuildings();
+		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
 		System.out.println("Finished loading objects.");
 	}
 	
@@ -217,10 +238,12 @@ public class ObjectService implements INetworkDispatch {
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
 			building.setPlanet(planet);
 			building.viewChildren(building, true, true, (object) -> {
-				objectList.put(object.getObjectID(), object);
-				if(object.getParentId() != 0 && object.getContainer() == null)
-					object.setParent(building);
-				object.getContainerInfo(object.getTemplate());
+				if (!checkIfObjectAlreadyInList(object.getObjectID())) {
+					objectList.put(object.getObjectID(), object);
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(building);
+					object.getContainerInfo(object.getTemplate());
+				}
 			});
 			SWGObject sign = (SWGObject) building.getAttachment("sign");
 			if(sign != null) {
@@ -558,11 +581,21 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-//				System.err.println("getObject(): object is null");
+				//System.err.println("getObject(): object is null");
+				//Thread.currentThread().dumpStack();
 			}
 		}
 		
 		return object;
+	}
+	
+	public boolean checkIfObjectAlreadyInList(long objectID){
+		SWGObject object = objectList.get(objectID);
+		
+		if (object == null)
+			return false;
+		else
+			return true;
 	}
 	
 	public Map<Long, SWGObject> getObjectList() {
@@ -585,6 +618,7 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void destroyObject(SWGObject object) {
+
 		if (object == null) {
 			return;
 		}
@@ -605,10 +639,12 @@ public class ObjectService implements INetworkDispatch {
 				@Override
 				public void run() {
 					try {
+
 						// Commented for now until found where the respawn is always set to 60 for any NPC
-//						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
-//						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
-//						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						((AIActor) object.getAttachment("AI")).destroyActor();
 						//object.setAttachment("AI", null);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -616,6 +652,7 @@ public class ObjectService implements INetworkDispatch {
 				}
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
+			//}, 30, TimeUnit.SECONDS);
 		}
 				
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -652,7 +689,8 @@ public class ObjectService implements INetworkDispatch {
 			parent.remove(object);
 			object.setParentId(parentId);
 		} else {
-			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+			if (!(object instanceof WaypointObject))
+				core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
 		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 		if(childObjects != null)
@@ -703,6 +741,8 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
+		cursor.close();
+		
 		return null;
 	}
 	
@@ -715,7 +755,7 @@ public class ObjectService implements INetworkDispatch {
 			customName = customName.split(" ")[0];
 		
 		try {
-			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\" ILIKE ?");
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT id FROM characters WHERE \"firstName\" ILIKE ?");
 			ps.setString(1, customName);
 			ResultSet resultSet = ps.executeQuery();
 
@@ -739,10 +779,43 @@ public class ObjectService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) core.getSWGObjectODB().get(objectId);
 		if (object != null) {
 			loadServerTemplate(object);
+			if(! checkIfObjectAlreadyInList(object.getObjectID()))
+				objectList.put(object.getObjectID(), object);
+			
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
+			object.viewChildren(object, true, true, (child) -> instantiateChild(child));
+			/* Diagnostic part */
+//			System.out.println("Creo : " + object.getCustomName()); 
+//			System.out.println("Creo ID : " + object.getObjectID()); 
+//			System.out.println("Equipment List : " + object.getEquipmentList().size());
+			/* Diagnostic part */
+			
+			SWGList<Equipment> eqList = object.getEquipmentList();
+			List<Equipment> delList = new ArrayList<Equipment>();
+			for (Equipment eq : eqList){
+//				System.out.println("Equipment getObjectID() " + eq.getObjectId());
+//				System.out.println("Equipment Class " + eq.getObject().getClass()); -> NPE
+//				System.out.println("Equipment Name " + eq.getObject().getCustomName()); -> NPE
+//				System.out.println("Equipment Template " + eq.getObject().getTemplate()); -> NPE
+				
+				if (!checkIfObjectAlreadyInList(eq.getObjectId()))
+					delList.add(eq);
+			}
+			
+			eqList.removeAll(delList); // The persisted equipment list contains objects that do not exist anymore, merely a hotfix really
 		}
-		
-		return (CreatureObject) object;
+		return object;
+	}
+	
+	public void instantiateChild(SWGObject child) {
+//		SWGObject object = (SWGObject) core.getSWGObjectODB().get(child);
+//		createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate)
+//		System.out.println("childname : " + child.getCustomName()); 
+//		System.out.println("Child Class " + child.getClass());
+		if(! checkIfObjectAlreadyInList(child.getObjectID()))
+			objectList.put(child.getObjectID(), child);
+//		System.out.println("Child getObjectID() " + child.getObjectID());
+//		System.out.println("Child class " + child.getClass().getName());
 	}
 	
 	public long generateObjectID() {
@@ -760,22 +833,23 @@ public class ObjectService implements INetworkDispatch {
 
 		// stack overflow when using recursion
 		long newId = 0;
-		try {
+		//try {
 			synchronized(objectMutex) {
-				newId = highestId.get();
+				newId = highestId.incrementAndGet();
 				ObjectDatabase objectIdODB = core.getObjectIdODB();
 				while (objectList.containsKey(newId) || objectIdODB.contains(newId)) {
 					newId = highestId.incrementAndGet();
 				}
+				//System.out.println("Got an objid.");
 			}
-			final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
+			/*final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
 			final PreparedStatement ps2 = databaseConnection.preparedStatement(sql);
 			ps2.setLong(1, newId);
 			ps2.executeUpdate();
 			ps2.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 		return newId;
 	}
@@ -788,16 +862,98 @@ public class ObjectService implements INetworkDispatch {
 		
 		long objectId = 0;
 		
-		if (core.getDuplicateIdODB().contains(key)) {
-			objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+		boolean containsKey;
+		
+		synchronized(objectMutex) {
+			containsKey = core.getDuplicateIdODB().contains(key);
+		}
+		
+		if (containsKey) {
+			synchronized(objectMutex) {
+				objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				System.err.println("Warning: DOId already in use.  Using one from reusableId pool instead.");
+				return getReusableId();
+			}
 		} else {
-			objectId = generateObjectID();
-			core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+				}
+				
+				break;
+			}
+			
+			synchronized(objectMutex) {
+				core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			}
 		}
 		
 		return objectId;
 	}
-
+	
+	public long getReusableId() {
+		long objectId = 0;
+		
+		synchronized(objectMutex) {
+			objectId = reusableIds.iterator().next();
+			
+			while (objectList.containsKey(objectId) && iteratedReusedIds++ < reusableIds.size()) {
+				objectId = reusableIds.get(iteratedReusedIds);
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				objectId = 0;
+			}
+		}
+		
+		if (objectId == 0) {
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					core.getReusableIdODB().put(objectId, new ObjectId(objectId));
+					reusableIds.add(objectId);
+					iteratedReusedIds++;
+					
+					break;
+				}
+			}
+		}
+		
+		return objectId;
+	}
+	
 	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
 		Vector<SWGObject> itemList = new Vector<SWGObject>();
 		SWGObject container = getObject(containerId);
@@ -1043,8 +1199,10 @@ public class ObjectService implements INetworkDispatch {
 					System.err.println("NULL Client");
 					return;
 				}
+				
 				CreatureObject creature = null;
-				if(getObject(objectId) == null) {
+
+				if(objectId != 0L && getObject(objectId) == null) {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.err.println("Cant get creature from db");
@@ -1054,14 +1212,14 @@ public class ObjectService implements INetworkDispatch {
 							System.err.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
 						} else {
-							System.err.println("SelectCharacter: not in object list");
+							//System.err.println("SelectCharacter: not in object list"); Because it wasnt added still at this point
 						}
 					}
 					
 				} else {
 					
 					if (!(getObject(objectId) instanceof CreatureObject)) {
-						System.out.println("Character is not an instance of CreatureObject!");
+						System.out.println("Character is not an instance of CreatureObject or is null!");
 						return;
 					}
 					
@@ -1079,6 +1237,10 @@ public class ObjectService implements INetworkDispatch {
 						creature.setClient(null);
 					}
 				}
+				
+				creature.setIntendedTarget(0);
+				
+				creature.setLookAtTarget(0);
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
@@ -1114,14 +1276,20 @@ public class ObjectService implements INetworkDispatch {
 				});
 				
 				creature.viewChildren(creature, true, true, (object) -> {
-					if(object.getMutex() == null)
-						object.initializeBaselines();
-						object.initAfterDBLoad();
-					if(object.getParentId() != 0 && object.getContainer() == null)
-						object.setParent(getObject(object.getParentId()));
-					object.getContainerInfo(object.getTemplate());
-					if(getObject(object.getObjectID()) == null)
-						objectList.put(object.getObjectID(), object);					
+					if (object != null) {
+						if(object.getMutex() == null)
+							object.initializeBaselines();
+							object.initAfterDBLoad();
+						if(object.getParentId() != 0 && object.getContainer() == null)
+							object.setParent(getObject(object.getParentId()));
+						object.getContainerInfo(object.getTemplate());
+//						if(getObject(object.getObjectID()) != null)
+//							objectList.put(object.getObjectID(), object);
+						if(! checkIfObjectAlreadyInList(object.getObjectID()))
+							objectList.put(object.getObjectID(), object);
+					} else {
+						Thread.currentThread().dumpStack();
+					}
 				});
 
 				if(creature.getParentId() != 0) {
@@ -1345,18 +1513,260 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
 		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
-		
+		System.out.println("loadBuildoutObjects");
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String areaName = (String) buildoutTable.getObject(i, 0);
 			float x1 = (Float) buildoutTable.getObject(i, 1);
 			float z1 = (Float) buildoutTable.getObject(i, 2);
 			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
-
 		}
+		
+		addCellsToBuildings();
+		finalizeBuildings();
 	}
 	
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
+
+		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
+		String planetName = planet.getName();
+		Map<Long, Long> duplicate = new HashMap<Long, Long>();
+
+		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
+			String template;
+			
+			if(buildoutTable.getColumnCount() <= 11)
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 0));
+			else
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 3));
+			
+			if(template != null) {
+				
+				float px, py, pz, qw, qx, qy, qz, radius;
+				long objectId = 0, containerId = 0, objectId2 = 0, containerId2 = 0;
+				int type = 0, cellIndex = 0, portalCRC;
+				
+				if(buildoutTable.getColumnCount() <= 11) {
+
+					objectId2 = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());			
+					cellIndex = (Integer) buildoutTable.getObject(i, 1);
+					px = (Float) buildoutTable.getObject(i, 2);
+					py = (Float) buildoutTable.getObject(i, 3);
+					pz = (Float) buildoutTable.getObject(i, 4);
+					qw = (Float) buildoutTable.getObject(i, 5);
+					qx = (Float) buildoutTable.getObject(i, 6);
+					qy = (Float) buildoutTable.getObject(i, 7);
+					qz = (Float) buildoutTable.getObject(i, 8);
+					radius = (Float) buildoutTable.getObject(i, 9);
+					portalCRC = (Integer) buildoutTable.getObject(i, 10);
+				
+				} else {
+							
+					// Since the ids are just ints, they append 0xFFFF86F9 to them
+					// This is demonstated in the packet sent to the server when you /target client-spawned objects
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					objectId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("objid", i));
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
+					containerId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("container", i));
+					type = (Integer) buildoutTable.getObject(i, 2);
+					cellIndex = (Integer) buildoutTable.getObject(i, 4);
+					
+					px = (Float) buildoutTable.getObject(i, 5);
+					py = (Float) buildoutTable.getObject(i, 6);
+					pz = (Float) buildoutTable.getObject(i, 7);
+					qw = (Float) buildoutTable.getObject(i, 8);
+					qx = (Float) buildoutTable.getObject(i, 9);
+					qy = (Float) buildoutTable.getObject(i, 10);
+					qz = (Float) buildoutTable.getObject(i, 11);
+					radius = (Float) buildoutTable.getObject(i, 12);
+					portalCRC = (Integer) buildoutTable.getObject(i, 13);
+					
+				}
+				
+				
+				// Treeku - Refactored to work around duplicate objectIds
+				// Required for instances/heroics which are duplicated ie. 10 times
+				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && checkIfObjectAlreadyInList(objectId)) {
+					SWGObject object = getObject(objectId);
+					
+					// Same coordinates is a true duplicate
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
+						py == object.getPosition().y &&
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
+						//System.out.println("Duplicate buildout object: " + template);
+						continue;
+					}
+				}
+				
+				if (duplicate.containsKey(containerId)) {
+					containerId = duplicate.get(containerId);
+				}
+
+
+
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
+				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				if (objectId != 0 && checkIfObjectAlreadyInList(objectId) && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+					SWGObject container = getObject(containerId);
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key)) {
+						newObjectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						core.getDuplicateIdODB().put(key, new DuplicateId(key, newObjectId));
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
+				}
+				
+
+				List<Long> containers = new ArrayList<Long>();
+				SWGObject object;
+				if(objectId != 0 && containerId == 0) {		
+					if(portalCRC != 0) { // Is building
+						//if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId)){
+						if (core.getSWGObjectODB().contains(objectId)){
+							if(buildoutDEBUG) System.err.println("core.getSWGObjectODB().contains(objectId)" + template + "  "+ Long.toHexString(objectId));
+							continue;
+						}
+						if (duplicate.containsValue(objectId)){
+							if(buildoutDEBUG) System.err.println("duplicate.containsValue(objectId)" + template + "  "+ Long.toHexString(objectId));
+							continue;
+						}
+						if (checkIfObjectAlreadyInList(objectId)){
+							if(buildoutDEBUG) System.err.println("checkIfObjectAlreadyInList(objectId) " + template + "  "+ Long.toHexString(objectId));
+							continue;
+						}
+						
+						containers.add(objectId);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
+						object.setAttachment("childObjects", null);
+						
+						// must use the objectListId to identify the building later with cellMap.get(containerId)
+						buildingMap.put(objectId, ((BuildingObject) object));
+						//System.out.println("buildingMap put " + Long.toHexString(objectId));
+						/*if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}*/
+					} else { // building without portal, Seems to never happen
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+
+					}
+					if(object == null) {
+						//System.err.println("Buildout table contained an entry that can't be instantiated!");
+						continue;
+					}
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					if(radius > 256)
+						object.setAttachment("bigSpawnRange", new Boolean(true));
+					
+					
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0){
+						synchronized(persistentBuildings) {
+							persistentBuildings.add((BuildingObject) object);
+						}
+					}		
+					
+				} else if(containerId != 0) {
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, true);
+					if(containers.contains(containerId)) {
+						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+						object.setisInSnapshot(false);
+						//containers.add(objectId); // ?!?!?!
+					}
+					if(object instanceof CellObject && cellIndex != 0) {
+						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
+						((CellObject) object).setCellNumber(cellIndex);
+						List<CellObject> cellList = cellMap.get(containerId);
+						//System.out.println("Cell containerId " + Long.toHexString(containerId));
+						if (cellList != null){
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId, cellList);
+						} else {
+							cellList = new ArrayList<CellObject>();
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId, cellList);
+						}
+					}
+//					SWGObject parent = getObject(containerId);
+//					
+//					if(parent != null && object != null) {
+//						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+//							continue;
+//						parent.add(object);
+//					}
+				} else {
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
+				}
+				
+				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
+				if(object != null)
+					object.setAttachment("isBuildout", new Boolean(true));
+			}
+				
+			
+		}
+
+//		for(BuildingObject building : persistentBuildings) {
+//			building.setAttachment("buildoutBuilding", true);
+//			core.getSWGObjectODB().put(building.getObjectID(), building);
+//			destroyObject(building);
+//		}
+		
+	}
+	 
+	private void addCellsToBuildings(){
+		Iterator it = null;
+		synchronized(buildingMap){
+			it = buildingMap.entrySet().iterator();
+		}
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        long buildingId = (long) pairs.getKey();
+	        BuildingObject building = (BuildingObject)pairs.getValue();
+			//System.out.println("We have buildingId " +buildingId);
+			List<CellObject> cellList = cellMap.get(buildingId);
+			if (cellList!=null) {
+				if(buildoutDEBUG) System.out.println("We have " + cellList.size() + " cells");
+				for (CellObject cell : cellList){
+					building.add(cell);
+					if(buildoutDEBUG) System.out.println("Building : " + building.getTemplate() + " cell " + cell.getCellNumber());
+				}
+			} else {/*System.out.println("Cellist null");*/}
+	        	        
+			it.remove();    
+	    }	
+	    
+	}
+	
+	private void finalizeBuildings(){
+		synchronized(persistentBuildings) {
+			for(BuildingObject building : persistentBuildings) {
+				building.setAttachment("buildoutBuilding", true);
+				core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
+				//core.getSWGObjectODB().put(building.getObjectID(), building);
+				//destroyObject(building);
+			}
+		}
+	}
+	
+	
+	public void readBuildoutDatatableOLD(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
@@ -1413,7 +1823,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				// Treeku - Refactored to work around duplicate objectIds
 				// Required for instances/heroics which are duplicated ie. 10 times
-				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && (checkIfObjectAlreadyInList(objectId))) {
 					SWGObject object = getObject(objectId);
 					
 					// Same coordinates is a true duplicate
@@ -1432,7 +1843,8 @@ public class ObjectService implements INetworkDispatch {
 				String planetName = planet.getName();
 				
 				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
-				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				if (objectId != 0 && checkIfObjectAlreadyInList(objectId) && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
 					float x = (px + ((container == null) ? x1 : container.getPosition().x));
 					float z = (pz + ((container == null) ? z1 : container.getPosition().z));

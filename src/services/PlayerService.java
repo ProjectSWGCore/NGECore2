@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -38,8 +39,10 @@ import java.util.function.Predicate;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+
 
 
 import protocol.swg.CharacterSheetResponseMessage;
@@ -279,7 +282,16 @@ public class PlayerService implements INetworkDispatch {
 					return;
 				}
 				
-				long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+				//long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+				// causes java.lang.IllegalStateException: Accept exceeded fixed size of 1336
+				
+				Set<SWGObject> awareObjects = creature.getAwareObjects();
+				List<Long> idList = new ArrayList<Long>();
+				for (SWGObject ob : awareObjects) {
+					idList.add(ob.getObjectID());
+				}
+				
+				Long[] ids = idList.toArray(new Long[idList.size()]);
 				for(int i = 0; i < ids.length; i++) {
 					for(int j = 0; j < ids.length; j++) {
 						if(ids[i] == ids[j] && i != j) 
@@ -719,7 +731,7 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		if (profession == null || !Professions.isProfession(profession)) {
+		if (profession == null || !Professions.isProfession(profession) || player.getProfession().equals(profession)) {
 			return;
 		}
 		
@@ -787,37 +799,33 @@ public class PlayerService implements INetworkDispatch {
 	public void resetLevel(CreatureObject creature, boolean unequipItems) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		SWGObject inventory = creature.getSlottedObject("inventory");
+		SWGObject appearance = creature.getSlottedObject("appearance_inventory");
+		
+		if (appearance==null)
+			System.err.println("Apearance inventory is null");
 		
 		if (unequipItems) {
 			try {
-				for (Equipment equipmentObject : new ArrayList<Equipment>(creature.getEquipmentList())) {
-					
-					SWGObject equipment = core.objectService.getObject(equipmentObject.getObjectId());
-					
-					if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
-						continue;
+				String[] slots = { "hat", "earring_r", "earring_l", "eyes", "mouth", "neck", "cloak", "back", "chest1", "chest2", "chest3_r", "chest3_l", "bicep_r", "bicep_l", "bracer_lower_r", "bracer_upper_r", "bracer_lower_l", "bracer_upper_l", "wrist_r", "wrist_l", "gloves", "hold_r", "hold_l", "ring_r", "ring_l", "utility_belt", "pants1", "pants2", "shoes" };
+				
+				for (String slot : slots) {
+					if (creature.getSlottedObject(slot) != null) {
+						core.equipmentService.unequip(creature, creature.getSlottedObject(slot));
 					}
-					
-					switch (equipment.getTemplate()) {
-						case "object/tangible/inventory/shared_character_inventory.iff":
-						case "object/tangible/inventory/shared_appearance_inventory.iff":
-						case "object/tangible/datapad/shared_character_datapad.iff":
-						case "object/tangible/bank/shared_character_bank.iff":
-						case "object/tangible/mission_bag/shared_mission_bag.iff":
-						case "object/weapon/creature/shared_creature_default_weapon.iff":
-							continue;
-						default:
-							creature.transferTo(creature, inventory, equipment);
+				}
+				
+				
+				slots = new String[]  { "hat", "earring_r", "earring_l", "eyes", "mouth", "neck", "cloak", "back", "chest1", "chest2", "chest3_r", "chest3_l", "bicep_r", "bicep_l", "bracer_lower_r", "bracer_upper_r", "bracer_lower_l", "bracer_upper_l", "wrist_r", "wrist_l", "gloves", "utility_belt", "pants1", "pants2", "shoes" };
+				
+				for (String slot : slots) {
+					if (appearance.getSlottedObject(slot) != null) {
+						core.equipmentService.unequip(creature, creature.getSlottedObject(slot));
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
-		//for (SWGObject equipment : creature.getAppearanceEquipmentList()) {
-			//core.equipmentService.unequip(creature, equipment);
-		//}
 		
 		for (Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			if (buff.isRemoveOnRespec()) {

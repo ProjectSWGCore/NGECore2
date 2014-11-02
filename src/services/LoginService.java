@@ -212,17 +212,17 @@ public class LoginService implements INetworkDispatch{
                 		PreparedStatement preparedStatement;
                 		
                 		preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
-                		preparedStatement.setLong(1, packet.getcharId());
-                		preparedStatement.setInt(2, packet.getgalaxyId());
+                		preparedStatement.setLong(1, packet.getCharId());
+                		preparedStatement.setInt(2, packet.getGalaxyId());
                 		preparedStatement.setInt(3, (int) client.getAccountId());
                 		boolean resultSet = preparedStatement.execute();   
                 		
                 		//TODO: send deletecharacter failed
                 		if(!resultSet) {
-                			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
+                			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getCharId());
                 			
                 			if (object == null)
-                				object = (CreatureObject) core.objectService.getCreatureFromDB(packet.getcharId());
+                				object = (CreatureObject) core.objectService.getCreatureFromDB(packet.getCharId());
                 			
                 			if (object != null) {
                 				if (object.isInQuadtree() && object.getClient() != null) {
@@ -312,11 +312,18 @@ public class LoginService implements INetworkDispatch{
 		PreparedStatement preparedStatement;
 
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT \"firstName\", \"lastName\", appearance, id, \"galaxyId\", \"statusId\""
+					+ " FROM characters WHERE \"accountId\"= " + id);
 			resultSet = preparedStatement.executeQuery();
 
 			while (resultSet.next() && !resultSet.isClosed()) {
 				
+				if (core.objectService.getObject(resultSet.getLong("id")) == null) {
+					resultSet.deleteRow();
+					continue;
+				}
+				
+				//TODO: on creation just don't allow spaces in first or last name maybe?
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");
 
@@ -344,7 +351,7 @@ public class LoginService implements INetworkDispatch{
 		LoginEnumCluster servers = new LoginEnumCluster(9);
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM galaxies");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT id, name FROM galaxies");
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				servers.addServer(resultSet.getInt("id"), resultSet.getString("name"));
@@ -363,7 +370,8 @@ public class LoginService implements INetworkDispatch{
 		LoginClusterStatus clusterStatus = new LoginClusterStatus();
 		ResultSet resultSet;
 		try {
-			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT * FROM \"connectionServers\"");
+			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT id, address, port, \"pingPort\", \"statusId\""
+					+ " FROM \"connectionServers\"");
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				clusterStatus.addServer(
