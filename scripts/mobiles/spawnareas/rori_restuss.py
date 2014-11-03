@@ -6,5 +6,5 @@ def addSpawnArea(core):
 	dynamicGroups = Vector()
 	dynamicGroups.add('imperial')
 	dynamicGroups.add('rebel')
-	core.spawnService.addDynamicSpawnArea(dynamicGroups, 5378, 5674, 200, 'rori')
+	core.spawnService.addDynamicSpawnArea(dynamicGroups, 5378, 5674, 400, 'rori')
 	return

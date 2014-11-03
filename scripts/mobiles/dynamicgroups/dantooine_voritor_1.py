@@ -10,8 +10,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('voritor_dasher')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
-	dynamicGroup.setName('graul_mauler_nw_group_1')
+	dynamicGroup.setName('dantooine_voritor_1')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('voritor_nw_group_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_voritor_1', dynamicGroup)
 	return

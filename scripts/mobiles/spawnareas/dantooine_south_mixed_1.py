@@ -4,9 +4,9 @@ from java.util import Vector
 
 def addSpawnArea(core):
 	mixedGroups = Vector()
-	mixedGroups.add('jantas_nw_group_1')
+	mixedGroups.add('dantooine_jantas')
 	mixedGroups.add('graul_mauler_lair_group_1')
-	mixedGroups.add('quenker_relic_reaper_group')
+	mixedGroups.add('dantooine_quenker_relic')
 	mixedGroups.add('voritor_lair_group_1')
 	mixedGroups.add('thune_lair_group_1')
 	mixedGroups.add('bol_lair_group_1')
