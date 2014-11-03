@@ -11,6 +11,6 @@ def addDynamicGroup(core):
 	dynamicGroup.setGroupMembersNumber(1)
 	dynamicGroup.setName('tatooine_ancient_krayt')
 	dynamicGroup.setMaxSpawns(1)
-	dynamicGroup.setMinSpawnDistance(5)
+	dynamicGroup.setMinSpawnDistance(150)
 	core.spawnService.addDynamicGroup('tatooine_ancient_krayt', dynamicGroup)
 	return

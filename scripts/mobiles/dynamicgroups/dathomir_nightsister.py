@@ -19,6 +19,6 @@ def addDynamicGroup(core):
 	dynamicGroup.setGroupMembersNumber(-5)
 	dynamicGroup.setName('dathomir_nightsister')
 	dynamicGroup.setMaxSpawns(-1)
-	dynamicGroup.setMinSpawnDistance(100)
+	dynamicGroup.setMinSpawnDistance(150)
 	core.spawnService.addDynamicGroup('dathomir_nightsister', dynamicGroup)
 	return
