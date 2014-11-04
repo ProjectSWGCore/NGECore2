@@ -20,6 +20,6 @@ def addDynamicGroup(core):
 	dynamicGroup.setGroupMembersNumber(-5)
 	dynamicGroup.setName('imperial')
 	dynamicGroup.setMaxSpawns(-1)
-	dynamicGroup.setMinSpawnDistance(80)
+	dynamicGroup.setMinSpawnDistance(150)
 	core.spawnService.addDynamicGroup('imperial', dynamicGroup)
 	return

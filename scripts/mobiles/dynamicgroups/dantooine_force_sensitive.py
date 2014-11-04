@@ -13,8 +13,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('untrained_wielder_of_the_dark_side')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
-	dynamicGroup.setName('force_sensitives_wild_1')
+	dynamicGroup.setName('dantooine_force_sensitive')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('force_sensitives_wild_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_force_sensitive', dynamicGroup)
 	return

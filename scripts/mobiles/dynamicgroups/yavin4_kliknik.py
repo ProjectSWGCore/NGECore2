@@ -20,7 +20,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('kliknik_warrior')
 	mobileTemplates.add('kliknik_worker')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('yavin4_klinik')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

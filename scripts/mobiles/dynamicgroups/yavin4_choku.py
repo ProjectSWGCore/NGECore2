@@ -14,7 +14,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('choku_packmaster')
 	mobileTemplates.add('choku_pup')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('yavin4_choku')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
