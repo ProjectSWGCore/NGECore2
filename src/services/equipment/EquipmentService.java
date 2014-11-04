@@ -84,20 +84,7 @@ public class EquipmentService implements INetworkDispatch {
 			for (Equipment equipment : replacedEquipment) {
 				SWGObject replacedItem = core.objectService.getObject(equipment.getObjectId());
 				
-				if (actor.isWearing(replacedItem)) {
-					String template = ((replacedItem.getAttachment("customServerTemplate") == null) ? replacedItem.getTemplate() : (replacedItem.getTemplate().split("shared_")[0] + "shared_" + ((String) replacedItem.getAttachment("customServerTemplate")) + ".iff"));
-					String serverTemplate = template.replace(".iff", "");
-					
-					PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
-					
-					if (func != null) {
-						func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(replacedItem));
-					}
-					
-					processItemAtrributes(actor, replacedItem, false);
-				} else {
-					replacedEquipment.remove(equipment);
-				}
+				unequip(actor, replacedItem);
 			}
 			
 			String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
