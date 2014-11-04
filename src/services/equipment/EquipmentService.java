@@ -107,7 +107,7 @@ public class EquipmentService implements INetworkDispatch {
 				actor.setWeaponId(item.getObjectID());
 			}
 			
-			processItemAtrributes(actor, item, true);
+			processItemAtrributes(actor, item, true);//FIXME: If item bonuses stop working this might need to be moved back to the line before "actor.addObjectToEquipList(item);"
 		}
 	}
 	
@@ -133,7 +133,7 @@ public class EquipmentService implements INetworkDispatch {
 			
 			actor.removeObjectFromEquipList(item);
 			
-			processItemAtrributes(actor, item, false);
+			processItemAtrributes(actor, item, false);//FIXME: If item bonuses stop working this might need to be moved back to the line before "actor.removeObjectFromEquipList(item);" 
 		}
 	}
 	
@@ -393,7 +393,7 @@ public class EquipmentService implements INetworkDispatch {
 					creature.setMaxAction(creature.getMaxAction() + Integer.parseInt((String) e.getValue()));
 				}
 			}
-		} else {//FIXME: 0000248_2 Whenever a player equips an item that isn't part of the set then the set bonus doesn't get removed.
+		} else {
 			if (item.getStringAttribute("cat_wpn_damage.wpn_category") != null) {
 				core.skillModService.deductSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 				creature.setAttachment("EquippedWeapon", null);
@@ -432,7 +432,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		calculateArmorProtection(creature, equipping);
 		
-		if (item.getAttachment("setBonus") != null) {//FIXME: 0000248_2 Whenever a player equips an item that isn't part of the set then the set bonus doesn't get removed.
+		if (item.getAttachment("setBonus") != null) {
 			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
 			bonus.callScript(creature);
 		}
