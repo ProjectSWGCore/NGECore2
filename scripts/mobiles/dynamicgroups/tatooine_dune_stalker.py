@@ -13,7 +13,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('dune_stalker_marksman')
 	mobileTemplates.add('dune_stalker_scavenger')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('tatooine_dune_stalker')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

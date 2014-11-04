@@ -6,11 +6,13 @@ from java.util import Vector
 def addDynamicGroup(core):
 	dynamicGroup = DynamicSpawnGroup()	
 	mobileTemplates = Vector()
-	mobileTemplates.add('adolescent_krayt_dragon')
+	mobileTemplates.add('slinking_voritor_hunter')
+	mobileTemplates.add('horned_voritor_jungle_lizard')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(1)
-	dynamicGroup.setName('adolescent_krayt_wild_1')
-	dynamicGroup.setMaxSpawns(1)
+	dynamicGroup.setName('dantooine_voritor_wild')
+	dynamicGroup.setMaxSpawns(-1)
+	dynamicGroup.setGroupMembersNumber(-5)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('adolescent_krayt_wild_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_voritor_wild', dynamicGroup)
 	return

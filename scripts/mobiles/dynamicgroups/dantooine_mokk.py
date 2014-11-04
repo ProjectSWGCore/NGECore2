@@ -21,8 +21,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('mokk_warrior')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
-	dynamicGroup.setName('mokk_group_1')
+	dynamicGroup.setName('dantooine_mokk')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('mokk_group_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_mokk', dynamicGroup)
 	return

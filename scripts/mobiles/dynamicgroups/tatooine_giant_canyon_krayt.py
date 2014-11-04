@@ -9,8 +9,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('giant_canyon_krayt_dragon')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(1)
-	dynamicGroup.setName('giant_canyon_krayt_dragon_1')
+	dynamicGroup.setName('tatooine_giant_canyon_krayt')
 	dynamicGroup.setMaxSpawns(1)
-	dynamicGroup.setMinSpawnDistance(60)
-	core.spawnService.addDynamicGroup('giant_canyon_krayt_dragon_1', dynamicGroup)
+	dynamicGroup.setMinSpawnDistance(150)
+	core.spawnService.addDynamicGroup('tatooine_giant_canyon_krayt', dynamicGroup)
 	return

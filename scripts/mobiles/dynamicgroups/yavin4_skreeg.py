@@ -17,7 +17,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('skreeg_warrior')
 	mobileTemplates.add('skreeg_warrior_elite')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('yavin4_skreeg')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

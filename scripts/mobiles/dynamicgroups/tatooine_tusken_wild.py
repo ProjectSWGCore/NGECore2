@@ -8,8 +8,8 @@ def addDynamicGroup(core):
 	mobileTemplates = Vector()
 	mobileTemplates.add('tusken_raider')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setName('tuskens_wild_1')
-	dynamicGroup.setMaxSpawns(20)
-	dynamicGroup.setMinSpawnDistance(25)
-	core.spawnService.addDynamicGroup('tuskens_wild_1', dynamicGroup)
+	dynamicGroup.setName('tatooine_tusken_wild')
+	dynamicGroup.setMaxSpawns(5)
+	dynamicGroup.setMinSpawnDistance(150)
+	core.spawnService.addDynamicGroup('tatooine_tusken_wild', dynamicGroup)
 	return

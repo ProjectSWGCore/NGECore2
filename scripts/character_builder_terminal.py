@@ -32,10 +32,9 @@ def screenOne (core, owner):
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, screenOneCallback)
 	window.addListBoxMenuItem('Character', 0)
 	window.addListBoxMenuItem('Items', 1)
-	window.addListBoxMenuItem('Instant Travel Locations', 2)
-	window.addListBoxMenuItem('Resources', 3)
+	window.addListBoxMenuItem('Resources', 2)
 	if core.adminService.getAccessLevelFromDB(owner.getClient().getAccountId()) is not None:
-		window.addListBoxMenuItem('Admin', 4)
+		window.addListBoxMenuItem('Admin', 3)
 	core.suiService.openSUIWindow(window);
 		
 def screenOneCallback(owner, window, eventType, returnList):
@@ -50,12 +49,9 @@ def screenOneCallback(owner, window, eventType, returnList):
 		itemsHandler(owner)
 		return
 	if returnList.get(0)=='2':
-		travelHandler(owner)
-		return
-	if returnList.get(0)=='3':
 		resourceHandler(owner)
 		return
-	if returnList.get(0)=='4':
+	if returnList.get(0)=='3':
 		adminHandler(owner)
 		return
 	return
@@ -128,48 +124,6 @@ def itemsHandlerCallback(owner, window, eventType, returnList):
 		return
 	return
 	
-def	travelHandler(owner):
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
-	window.setProperty('bg.caption.lblTitle:Text', 'Character Builder Terminal')
-	window.setProperty('Prompt.lblPrompt:Text', 'Welcome to Project SWG Test Center.')
-	window.setProperty('btnOk:visible', 'True')
-	window.setProperty('btnCancel:visible', 'True')
-	window.setProperty('btnOk:Text', '@ok')
-	window.setProperty('btnCancel:Text', '@cancel')	
-	returnList = Vector()
-	returnList.add('List.lstList:SelectedRow')
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, travelHandlerCallback)
-	window.addListBoxMenuItem('Tatooine, Mos Eisley', 0)
-	window.addListBoxMenuItem('Dantooine, Jedi Ruins', 1)
-	window.addListBoxMenuItem('Talus, Dearic Starport', 2)
-	window.addListBoxMenuItem('Naboo, Keren Starport', 3)
-	window.addListBoxMenuItem('Tatooine, Bestine Starport', 4)
-	core.suiService.openSUIWindow(window);
-	
-def travelHandlerCallback(owner, window, eventType, returnList):
-	inventory = owner.getSlottedObject('inventory')
-	if returnList.size()==0:
-		owner.sendSystemMessage('NULL', 0)	
-		return
-		
-	if returnList.get(0)=='0':
-		eisleyTravel(owner)
-		return
-	if returnList.get(0)=='1':
-		jediRuinsTravel(owner)
-		return
-	if returnList.get(0)=='2':
-		GCWDearicTravel(owner)
-		return
-	if returnList.get(0)=='3':
-		GCWKerenTravel(owner)
-		return
-	if returnList.get(0)=='4':
-		GCWBestineTravel(owner)
-		return
-	return
-	
-	
 def	resourceHandler(owner):
 	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
 	window.setProperty('bg.caption.lblTitle:Text', 'Character Builder Terminal')
@@ -209,7 +163,6 @@ def	adminHandler(owner):
 	window.addListBoxMenuItem('Vehicle', 0)
 	window.addListBoxMenuItem('Crafting', 1)
 	window.addListBoxMenuItem('Frog + Travel Terminal', 2)
-	window.addListBoxMenuItem('Placeholder', 3)
 	core.suiService.openSUIWindow(window);
 	
 def	adminHandlerCallback(owner, window, eventType, returnList):
@@ -281,8 +234,9 @@ def	armorHandler(owner):
 	returnList.add('List.lstList:SelectedRow')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, armorHandlerCallback)
 	window.addListBoxMenuItem('Composite', 0)
-	window.addListBoxMenuItem('Jedi Master Cloak', 1)
-	window.addListBoxMenuItem('Jedi Knight Robes', 2)
+	window.addListBoxMenuItem('Mando', 1)
+	window.addListBoxMenuItem('Jedi Master Cloak', 2)
+	window.addListBoxMenuItem('Jedi Knight Robes', 3)
 	core.suiService.openSUIWindow(window);
 	
 def armorHandlerCallback(owner, window, eventType, returnList):
@@ -295,9 +249,12 @@ def armorHandlerCallback(owner, window, eventType, returnList):
 		compositeArmor(owner, inventory)
 		return
 	if returnList.get(0)=='1':
+		mandoArmor(owner, inventory)
+		return	
+	if returnList.get(0)=='2':
 		jediMasterCloak(owner, inventory)
 		return
-	if returnList.get(0)=='2':
+	if returnList.get(0)=='3':
 		jediKnightRobes(owner, inventory)
 		return
 		
@@ -363,37 +320,37 @@ def credits(owner):
 def buff(owner):
 	core.buffService.addBuffToCreature(owner, 'me_buff_health_2', owner)
 	buff = owner.getBuffByName('me_buff_health_2')
-	buff.setDuration(5400)
+	buff.setDuration(10800)
 	owner.updateBuff(buff)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_action_3', owner)
 	buff1 = owner.getBuffByName('me_buff_action_3')
-	buff1.setDuration(5400)
+	buff1.setDuration(10800)
 	owner.updateBuff(buff1)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_agility_3', owner)
 	buff2 = owner.getBuffByName('me_buff_agility_3')
-	buff2.setDuration(5400)
+	buff2.setDuration(10800)
 	owner.updateBuff(buff2)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_melee_gb_1', owner)
 	buff3 = owner.getBuffByName('me_buff_melee_gb_1')
-	buff3.setDuration(5400)
+	buff3.setDuration(10800)
 	owner.updateBuff(buff3)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_ranged_gb_1', owner)
 	buff4 = owner.getBuffByName('me_buff_ranged_gb_1')
-	buff4.setDuration(5400)
+	buff4.setDuration(10800)
 	owner.updateBuff(buff4)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_precision_3', owner)
 	buff5 = owner.getBuffByName('me_buff_precision_3')
-	buff5.setDuration(5400)
+	buff5.setDuration(10800)
 	owner.updateBuff(buff5)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_strength_3', owner)
 	buff6 = owner.getBuffByName('me_buff_strength_3')
-	buff6.setDuration(5400)
+	buff6.setDuration(10800)
 	owner.updateBuff(buff6)
 	screenOne(core, owner)
 	return
@@ -408,7 +365,7 @@ def combatLevelDown(owner):
 	return
 	
 def rangedWeapons(owner, inventory):
-	rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_e11.iff', owner.getPlanet())
+	rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_a280.iff', owner.getPlanet())
 	rifle.setDamageType('energy')
 	rifle.setWeaponType(WeaponType.RIFLE)
 	rifle.setAttackSpeed(0.8)
@@ -416,7 +373,7 @@ def rangedWeapons(owner, inventory):
 	rifle.setMaxDamage(1035)
 	rifle.setMaxRange(64)
 	
-	pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet())
+	pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_intimidator.iff', owner.getPlanet())
 	pistol.setDamageType('energy')
 	pistol.setWeaponType(WeaponType.PISTOL)
 	pistol.setAttackSpeed(0.4)
@@ -424,7 +381,7 @@ def rangedWeapons(owner, inventory):
 	pistol.setMaxDamage(518)
 	pistol.setMaxRange(35)
 	
-	carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_e11.iff', owner.getPlanet())
+	carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_proton.iff', owner.getPlanet())
 	carbine.setDamageType('energy')
 	carbine.setWeaponType(WeaponType.CARBINE)
 	carbine.setAttackSpeed(0.6)
@@ -432,7 +389,7 @@ def rangedWeapons(owner, inventory):
 	carbine.setMaxDamage(780)
 	carbine.setMaxRange(50)
 	
-	heavy = core.objectService.createObject('object/weapon/ranged/heavy/shared_som_lava_cannon.iff', owner.getPlanet())
+	heavy = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_pvp.iff', owner.getPlanet())
 	heavy.setDamageType('energy')
 	heavy.setWeaponType(WeaponType.HEAVYWEAPON)
 	heavy.setAttackSpeed(1)
@@ -457,6 +414,16 @@ def meleeWeapons(owner, inventory):
 	polearm.setMinDamage(700)
 	polearm.setMaxDamage(990)
 	polearm.setWeaponType(WeaponType.POLEARMMELEE)
+	
+	lance = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_magna_guard.iff', owner.getPlanet())
+	lance.setAttackSpeed(1.0)
+	lance.setMaxRange(5)
+	lance.setDamageType('kinetic')
+	lance.setMinDamage(700)
+	lance.setMaxDamage(990)
+	lance.setWeaponType(WeaponType.POLEARMMELEE)
+	
+	inventory.add(lance)
 	inventory.add(polearm)
 	screenOne(core, owner)
 	return
@@ -530,10 +497,88 @@ def compositeArmor(owner, inventory):
 	inventory.add(comp_gloves);
 	screenOne(core, owner)
 	return
-	
+
+def mandoArmor(owner, inventory):
+	mando_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_bicep_r.iff", owner.getPlanet())
+	mando_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_bicep_l.iff", owner.getPlanet())
+	mando_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_bracer_r.iff", owner.getPlanet())
+	mando_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_bracer_l.iff", owner.getPlanet())
+	mando_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_leggings = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_leggings.iff", owner.getPlanet())
+	mando_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_helmet = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_helmet.iff", owner.getPlanet())
+	mando_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	mando_chest = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_chest_plate.iff", owner.getPlanet())
+	mando_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	mando_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	mando_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	mando_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	mando_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	mando_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
+	mando_shoes = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_shoes.iff", owner.getPlanet())
+	mando_gloves = core.objectService.createObject("object/tangible/wearables/armor/mandalorian/shared_armor_mandalorian_gloves.iff", owner.getPlanet())	
+											
+	inventory.add(mando_bicep_r);
+	inventory.add(mando_bicep_l);
+	inventory.add(mando_bracer_r);
+	inventory.add(mando_bracer_l);
+	inventory.add(mando_leggings);
+	inventory.add(mando_helmet);
+	inventory.add(mando_chest);
+	inventory.add(mando_shoes);
+	inventory.add(mando_gloves);
+	screenOne(core, owner)
+	return
+
 def jediMasterCloak(owner, inventory):
-	cloak = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_s05_h1.iff', owner.getPlanet(), 'item_jedi_robe_06_01')	
-	inventory.add(cloak)
+	cloak0 = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_s05_h1.iff', owner.getPlanet())	
+	cloak1 = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_jedi_dark_s05.iff', owner.getPlanet())	
+	cloak2 = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_jedi_light_s05.iff', owner.getPlanet())	
+	cloak3 = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_jedi_prefect_talmont.iff', owner.getPlanet())	
+	cloak3 = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_inquisitor.iff', owner.getPlanet())
+	inventory.add(cloak0)
+	inventory.add(cloak1)
+	inventory.add(cloak2)
+	inventory.add(cloak3)
 	screenOne(core, owner)
 	return
 	

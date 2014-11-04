@@ -4,7 +4,7 @@ from java.util import Vector
 
 def addSpawnArea(core):
 	mixedGroups = Vector()
-	mixedGroups.add('piket_plains_walker_group')
+	mixedGroups.add('dantooine_piket_plains')
 	mixedGroups.add('mixed_lair_group_1')
 	core.spawnService.addMixedSpawnArea(mixedGroups, 0, 2355, 1024, 'dantooine')
 	return
