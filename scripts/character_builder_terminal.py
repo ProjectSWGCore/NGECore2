@@ -610,20 +610,7 @@ def compositeArmor(owner, inventory):
 
 def clonetrooperArmor(owner, inventory):
 	clonetrooper_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bicep_r.iff", owner.getPlanet())
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	clonetrooper_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bicep_l.iff", owner.getPlanet())
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
 	clonetrooper_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bracer_r.iff", owner.getPlanet())
 	clonetrooper_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -632,38 +619,10 @@ def clonetrooperArmor(owner, inventory):
 	clonetrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	clonetrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	clonetrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	clonetrooper_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bracer_l.iff", owner.getPlanet())
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	clonetrooper_leggings = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_leggings.iff", owner.getPlanet())
-	clonetrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	clonetrooper_helmet = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_helmet.iff", owner.getPlanet())
-	clonetrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	clonetrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_chest_plate.iff", owner.getPlanet())
-	clonetrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	clonetrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	clonetrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	clonetrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	clonetrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	clonetrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	clonetrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_boots.iff", owner.getPlanet())
 	clonetrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_gloves.iff", owner.getPlanet())	
 											
