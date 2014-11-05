@@ -4,6 +4,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
+import org.apache.commons.collections.iterators.EntrySetMapIterator;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -52,7 +54,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
-	private ConcurrentHashMap<String,Performance> performances = new ConcurrentHashMap<String,Performance>();
+	private ConcurrentHashMap<PerformanceUID,Performance> performances = new ConcurrentHashMap<PerformanceUID,Performance>();
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
 	
@@ -68,6 +70,9 @@ public class EntertainmentService implements INetworkDispatch {
 		this.core = core;
 		populateSkillCaps();
 		populatePerformanceTable();
+		
+		System.out.printf("[DEBUG] number_of_performances: %d\n", performances.size());
+		
 		populatePerformanceEffects();
 		registerCommands();
 		loadCharacterCustomizationData();
@@ -437,13 +442,21 @@ public class EntertainmentService implements INetworkDispatch {
 				if (p.getType() == -1788534963) {
 					danceMap.put(new Integer(p.getDanceVisualId()), p);
 				}
-				performances.put(p.getPerformanceName(), p);
+				performances.put(new PerformanceUID(p.getPerformanceName(), p.getInstrumentAudioId()), p);
 				performancesByIndex.put(r, p);
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		
+		//TODO: Remove
+		Set<PerformanceUID> debugSet = performances.keySet();
+		for(PerformanceUID uid : debugSet)
+		{
+			System.out.println(uid.toString());
+		}
+		
 	}
 	
 	private void populateSkillCaps() {
@@ -608,13 +621,15 @@ public class EntertainmentService implements INetworkDispatch {
 		}*/
 	}
 	
+	//FIXME: Refactor using new map --Complete--
 	public int getDanceVisualId(String danceName) {
-		Performance p = performances.get(danceName);
+		Performance p = getPerformance(danceName, 0);
 		
 		//if 0 , then it's no dance. need to handle that in the script.
 		return ((p == null) ? 0 : p.getDanceVisualId());
 	}
 	
+	//FIXME: Refactor using new map ?? Perhaps not ??
 	public Map<Long,String> getAvailableDances(CreatureObject actor) {
 		
 		Map<Long,String> dances = new HashMap<Long, String>();
@@ -627,6 +642,7 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
+	//FIXME: if visualId > 0 then it is a dance...
 	public boolean isDance(int visualId) {
 		return ( danceMap.get(visualId) != null ) ;
 	}
@@ -647,8 +663,10 @@ public class EntertainmentService implements INetworkDispatch {
 		return danceMap.get(visualId);
 	}
 	
-	public Performance getPerformance(String name) {
-		return performances.get(name);
+	//FIXME: Refactor using new map -COMPLETE-
+	//FIXME: Returning null for known combination...
+	public Performance getPerformance(String name, int instrumentAudioId) {
+		return performances.get(new PerformanceUID(name, instrumentAudioId));
 	}
 	
 	public Performance getPerformanceByIndex(int index) {
@@ -757,6 +775,7 @@ public class EntertainmentService implements INetworkDispatch {
 			performer.sendSystemMessage("@performance:flourish_wait_self", (byte) 0);
 			return;
 		}
+		//FIXME: I don't think this will work.
 		Performance performance = getPerformanceByIndex(performer.getPerformanceId());
 
 		if(performance == null)
@@ -990,6 +1009,58 @@ public class EntertainmentService implements INetworkDispatch {
 	@Override
 	public void shutdown() {
 
+	}
+	
+	/**
+	 * @author Glen
+	 * This class serves as a unique id for performances. 
+	 * The performance.iff file is structured very similar to a database, and with that idea in mind
+	 * this helper-class will serve as essentially the primary key of each performance.
+	 */
+	private class PerformanceUID
+	{
+		private final String performanceName;
+		private final int instrumentAudioId;
+		
+		public PerformanceUID(String performanceName, int instrumentAudioId)
+		{
+			this.performanceName = performanceName;
+			this.instrumentAudioId = instrumentAudioId;
+		}
+		
+		public boolean equals(PerformanceUID other) {
+			if(other != null)
+			{
+				if(this.performanceName == other.performanceName && this.instrumentAudioId == other.instrumentAudioId)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj != null && this.getClass() == obj.getClass() && this.performanceName.equals(((PerformanceUID)obj).performanceName) && this.instrumentAudioId == ((PerformanceUID)obj).instrumentAudioId)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return this.performanceName != null ? performanceName.hashCode() * 37 + instrumentAudioId: instrumentAudioId;
+//			int hash = performanceName.hashCode() ^ instrumentAudioId;
+//			return hash;
+		}
+
+		@Override
+		public String toString() {
+			return "PerformanceUID [performanceName=" + performanceName
+					+ ", instrumentAudioId=" + instrumentAudioId + ", hashCode = " + hashCode() + "]";
+		}
+		
 	}
 
 }

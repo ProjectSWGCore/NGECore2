@@ -56,7 +56,9 @@ def startDance(core, actor, danceName, visual):
     entSvc = core.entertainmentService
 
     if visual <= 0:
-      visual = entSvc.getDanceVisualId(danceName)
+		print("[PYTHON] startdance.visual = " , visual)
+		visual = entSvc.getDanceVisualId(danceName)
+		print("[PYTHON] startdance.visual = " , visual)
 
     if visual <= 0:
       actor.sendSystemMessage('@performance:dance_unknown_self',0)
