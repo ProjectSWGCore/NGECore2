@@ -1006,6 +1006,15 @@ public class EntertainmentService implements INetworkDispatch {
 		return 0;
 	}
 	
+	/**
+	 * @param actor Player
+	 * @return SWGObject equipped in the player's right hand
+	 */
+	public SWGObject getInstrument(CreatureObject actor)
+	{
+		return actor.getSlottedObject("hold_r");
+	}
+	
 	@Override
 	public void shutdown() {
 
