@@ -17,11 +17,13 @@ def addPlanetSpawns(core, planet):
 
 	#rebrecruiter tyrena
 	tyrenaCantina = core.objectService.getObject(long(2625352))
-	stcSvc.spawnObject('rebel_recruiter', 'corellia', tyrenaCantina.getCellByCellNumber(11), float(-25.8), float(-0.9), float(0.4), float(0), float(-0.707), float(0), float(0.707))		
+	if tyrenaCantina not None:
+		stcSvc.spawnObject('rebel_recruiter', 'corellia', tyrenaCantina.getCellByCellNumber(11), float(-25.8), float(-0.9), float(0.4), float(0), float(-0.707), float(0), float(0.707))		
 	
 	#cnet cantina
 	cnetCantina = core.objectService.getObject(long(8105493))
-	stcSvc.spawnObject('rebel_recruiter', 'corellia', cnetCantina.getCellByCellNumber(11), float(-25.8), float(-0.9), float(0.4), float(0), float(-0.707), float(0), float(0.707))		
+	if cnetCantina not None:
+		stcSvc.spawnObject('rebel_recruiter', 'corellia', cnetCantina.getCellByCellNumber(11), float(-25.8), float(-0.9), float(0.4), float(0), float(-0.707), float(0), float(0.707))		
 	
 
 	return
