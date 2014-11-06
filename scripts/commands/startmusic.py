@@ -94,6 +94,10 @@ def startMusic(core, actor, performance, entSvc):
 		
 	actor.setPosture(0x09)
 	
+	#Turn on XP gain
+	playerObject = actor.getSlottedObject('ghost')
+    if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
+		entSvc.startPerformanceExperience(actor)
 	
 	entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, "dance_0", 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
 	pass
