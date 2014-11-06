@@ -1288,7 +1288,8 @@ public class ObjectService implements INetworkDispatch {
 						if(! checkIfObjectAlreadyInList(object.getObjectID()))
 							objectList.put(object.getObjectID(), object);
 					} else {
-						Thread.currentThread().dumpStack();
+						Thread.currentThread();
+						Thread.dumpStack();
 					}
 				});
 
@@ -1731,12 +1732,12 @@ public class ObjectService implements INetworkDispatch {
 	}
 	 
 	private void addCellsToBuildings(){
-		Iterator it = null;
+		Iterator<?> it = null;
 		synchronized(buildingMap){
 			it = buildingMap.entrySet().iterator();
 		}
 	    while (it.hasNext()) {
-	        Map.Entry pairs = (Map.Entry)it.next();
+	        Map.Entry<?, ?> pairs = (Map.Entry<?, ?>)it.next();
 	        long buildingId = (long) pairs.getKey();
 	        BuildingObject building = (BuildingObject)pairs.getValue();
 			//System.out.println("We have buildingId " +buildingId);
