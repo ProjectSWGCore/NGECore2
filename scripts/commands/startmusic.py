@@ -73,6 +73,7 @@ def run(core, actor, target, commandString):
 	'''
 	NOTE: animation files are "all_b_dnc_musician_<instrument-name>_loop.ans"
 	NOTE: flourish animation files are "all_b_dnc_musician_<instrument-name>_sp_8.ans"
+	This information doesn't seem to be needed...
 	'''
 	pass
 def startMusic(core, actor, performance, entSvc):
@@ -86,9 +87,10 @@ def startMusic(core, actor, performance, entSvc):
 		#return
 		pass
 		
-	'''if not actor.getPerformanceWatchee():
-		actor.setPerfomanceWatchee(actor)
-		actor.addSpectator(actor)'''
+	if not actor.getPerformanceWatchee():
+		#this also notifies the client with a delta4
+		actor.setPerformanceWatchee(actor)
+		actor.addSpectator(actor)
 		
 	actor.setPosture(0x09)
 	
