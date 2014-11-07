@@ -117,6 +117,7 @@ def handleStartMusic(core, owner, eventType, returnList):
 	print(item.getObjectId())
 	startMusic(core, actorObject, item.getObjectId())
 	pass
+
 def startMusic(core, actor, performanceLineNumber):
 	if actor.getPosture == 0x09:
 		actor.sendSystemMessage('@performance:already_performing_self', 0)
@@ -133,13 +134,33 @@ def startMusic(core, actor, performanceLineNumber):
 	playerObject = actor.getSlottedObject('ghost')
 	if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
 		entSvc.startPerformanceExperience(actor)
+		
+	performance = entSvc.getPerformanceByIndex(performanceLineNumber)#TODO: Refactor to not need this
+	audioId = performance.getInstrumentAudioId()
 	
-	#FIXME: player plays wrong song
+	songAnim = "music_0"
+	if audioId < 7:
+		songAnim = "music_3"	#Horns
+	elif audioId < 8:
+		songAnim = "music_1"	#Bandfill
+	elif audioId < 9:
+		songAnim = "music_4"	#Omnibox
+	elif audioId < 10:
+		songAnim = "music_2"	#Nargalon
+	elif audioId < 12:
+		songAnim = "music_5"	#String instruments
+	elif audioId < 14:
+		songAnim = "music_3"	#More horns
+	elif audioId < 15:
+		songAnim = "music_4"	#downeybox (Don't think this was ever added)
+		
+	print(songAnim)
+		
 	
 	actor.sendSystemMessage('@performance:music_start_self',0)
 	#entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, "dance_0", 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
 	#entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, anim, 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
-	entSvc.startPerformance(actor, performanceLineNumber+1, -842249156, 'music_2', 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
+	entSvc.startPerformance(actor, performanceLineNumber+1, -842249156, songAnim, 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
 	'''
 	Bandfill = music_1
 	Nargalon = music_2
