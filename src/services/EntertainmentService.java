@@ -51,6 +51,9 @@ public class EntertainmentService implements INetworkDispatch {
 
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
+    private static final int SONG = 866729052;
+    private static final int DANCE = -1788534963;
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
@@ -642,6 +645,22 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
+	public Map<Long, String> getAvailableSongs(CreatureObject actor, int instrumentCode)
+	{
+		Map<Long, String> songs = new HashMap<Long, String>();
+		for(Performance performance : performances.values())
+		{
+			if(performance.getInstrumentAudioId() == instrumentCode)
+			{
+				if(canPerform(actor, performance))
+				{
+					songs.put(new Long(performance.getLineNumber()), performance.getPerformanceName());
+				}
+			}
+		}
+		return songs;
+	}
+	
 	//FIXME: if visualId > 0 then it is a dance...
 	public boolean isDance(int visualId) {
 		return ( danceMap.get(visualId) != null ) ;
@@ -654,9 +673,21 @@ public class EntertainmentService implements INetworkDispatch {
 		return false;
 	}
 	
+	
 	public boolean canDance(CreatureObject actor, int visualId) {
 		if (!isDance(visualId)) { return false; }
 		return canDance(actor, danceMap.get(visualId));
+	}
+	
+	public boolean canPerform(CreatureObject actor, Performance performance)
+	{
+		if(performance.getRequiredInstrument() != null)
+		{
+			boolean hasInstrument = actor.hasAbility(performance.getRequiredInstrument());
+			boolean hasSong = actor.hasAbility(performance.getRequiredSong());
+			return  hasInstrument && hasSong;
+		}
+		else return actor.hasAbility(performance.getRequiredDance());
 	}
 
 	public Performance getDance(int visualId) {
@@ -664,7 +695,7 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	//FIXME: Refactor using new map -COMPLETE-
-	//FIXME: Returning null for known combination...
+	//FIXME: Returning null for known combination... - fixed?
 	public Performance getPerformance(String name, int instrumentAudioId) {
 		return performances.get(new PerformanceUID(name, instrumentAudioId));
 	}
