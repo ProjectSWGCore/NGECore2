@@ -55,20 +55,25 @@ def run(core, actor, target, commandString):
 		#TODO: Else if type is downeybox then audioID is 14
 		#FIXME: This instrument isn't equipped when played
 		
-		print("instrumentCode: " , instrumentCode)
+		#TODO: Handle instruments that are placed on the ground
+		
+		print('instrumentCode: ' , instrumentCode)
 		if instrumentCode > 0:
 			#TODO: Parse command string
 			if len(commandString) > 0:
 				params = commandString.split(" ")
 				performance = entSvc.getPerformance(params[0], instrumentCode)
+				print('line number: ', performance.getLineNumber())
 				#print(performance.getPerformanceName(), performance.getInstrumentAudioId())
 				startMusic(core, actor, performance, entSvc)
 				
 		else:
-			#TODO: In game error message
+			#Equipped item is not an instrument
+			actor.sendSystemMessage('@performance:music_no_instrument', 0)
 			pass
 	else:
-		#TODO: In game error message
+		#No instrument equipped
+		actor.sendSystemMessage('@performance:music_no_instrument', 0)
 		pass
 	'''
 	NOTE: animation files are "all_b_dnc_musician_<instrument-name>_loop.ans"
@@ -77,14 +82,16 @@ def run(core, actor, target, commandString):
 	'''
 	pass
 def startMusic(core, actor, performance, entSvc):
-	print (actor.getPosture())
+	
 	if performance is None:
-		#TODO: Client error message
+		#Not a proper song
+		actor.sendSystemMessage('@performance:music_invalid_song', 0)
 		return
+	
 	#TODO: Handle lack of skill
+	
 	if actor.getPosture == 0x09:
-		#TODO: Client error 
-		#return
+		actor.sendSystemMessage('@performance:music_fail', 0)
 		pass
 		
 	if not actor.getPerformanceWatchee():
@@ -96,9 +103,25 @@ def startMusic(core, actor, performance, entSvc):
 	
 	#Turn on XP gain
 	playerObject = actor.getSlottedObject('ghost')
-    if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
+	if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
 		entSvc.startPerformanceExperience(actor)
 	
-	entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, "dance_0", 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
+	#FIXME: player plays wrong song
+	
+	anim = 'music_'+ str(performance.getLineNumber())
+	#entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, "dance_0", 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
+	#entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, anim, 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
+	entSvc.startPerformance(actor, performance.getLineNumber(), -842249156, 'music_8', 0)#TODO: Figure out what exactly goes in parameter slots 2 and 3
+	'''
+	Bandfill = music_1
+	Nargalon = music_2
+	(Some flute-ish)[perhaps traz] = music_3
+	Omnibox = music_4
+	Mandoviol = music_5
+	Nil = music_6
+	Nargalon = music_8
+	
+	'''
+	
 	pass
 	
