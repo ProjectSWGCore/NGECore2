@@ -2,6 +2,7 @@ import sys
 
 def setup(core, object):
 	object.setIntAttribute('no_trade', 1)
+	object.setIntAttribute('reuse_time', 5)
 	object.setAttachment('radial_filename', 'object/usable')
 	object.setStfFilename('static_item_n')
 	object.setStfName('invasion_gcw_binoculars_01_01')
