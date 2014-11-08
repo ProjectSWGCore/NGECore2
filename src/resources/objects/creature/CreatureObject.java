@@ -367,7 +367,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		if (getPosture() == resources.datatables.Posture.SkillAnimating) {
-			stopPerformance();//FIXME: Find a way to do this with EntertainmentService
+			//stopPerformance();
+			NGECore.getInstance().entertainmentService.stopPerformance(this);
 		}
 		
 		if (getPosture() == posture) {

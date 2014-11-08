@@ -733,7 +733,7 @@ public class EntertainmentService implements INetworkDispatch {
 		
 		String performanceType = (performance.getType() == DANCE)? "dance" : "music";
 		
-	   // actor.sendSystemMessage(String.format("@performance:%s_stop_self", performanceType), (byte)0);//FIXME: This hasn't been sending the correct message
+	   actor.sendSystemMessage(String.format("@performance:%s_stop_self", performanceType), (byte)0);//FIXME: This hasn't been sending the correct message
 	    stopAudience(actor);
 
 		if (actor.isPerforming()) {
