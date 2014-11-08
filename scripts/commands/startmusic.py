@@ -18,7 +18,6 @@ def run(core, actor, target, commandString):
 	entSvc = core.entertainmentService
 	
 	instrumentObj = entSvc.getInstrument(actor)
-	
 	#TODO: Determine if player has an instrument
 	if instrumentObj is not None:
 		#If player does have an instrument then determine what type of instrument the player has
@@ -69,13 +68,13 @@ def run(core, actor, target, commandString):
 		
 		#TODO: Handle instruments that are placed on the ground
 		
-		print('instrumentCode: ' , instrumentCode)
+		#print('instrumentCode: ' , instrumentCode)
 		if instrumentCode > 0:
 			#Parse command string
 			if len(commandString) > 0:
 				params = commandString.split(" ")
 				performance = entSvc.getPerformance(params[0], instrumentCode)
-				print('line number: ', performance.getLineNumber())
+				#print('line number: ', performance.getLineNumber())
 				if performance is None:
 					#Not a proper song
 					actor.sendSystemMessage('@performance:music_invalid_song', 0)
@@ -119,7 +118,8 @@ def handleStartMusic(core, owner, eventType, returnList):
 	pass
 
 def startMusic(core, actor, performanceLineNumber):
-	if actor.getPosture == 0x09:
+	print("Already performing")
+	if actor.getPosture() == 0x09:
 		actor.sendSystemMessage('@performance:already_performing_self', 0)
 		pass
 		
@@ -154,7 +154,7 @@ def startMusic(core, actor, performanceLineNumber):
 	elif audioId < 15:
 		songAnim = "music_4"	#downeybox (Don't think this was ever added)
 		
-	print(songAnim)
+	#print(songAnim)
 		
 	
 	actor.sendSystemMessage('@performance:music_start_self',0)

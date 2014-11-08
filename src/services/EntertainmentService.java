@@ -76,7 +76,7 @@ public class EntertainmentService implements INetworkDispatch {
 		populateSkillCaps();
 		populatePerformanceTable();
 		
-		System.out.printf("[DEBUG] number_of_performances: %d\n", performances.size());
+		//System.out.printf("[DEBUG] number_of_performances: %d\n", performances.size());
 		
 		populatePerformanceEffects();
 		registerCommands();
@@ -456,11 +456,13 @@ public class EntertainmentService implements INetworkDispatch {
 		}
 		
 		//TODO: Remove
+		/*
 		Set<PerformanceUID> debugSet = performances.keySet();
 		for(PerformanceUID uid : debugSet)
 		{
 			System.out.println(uid.toString());
 		}
+		*/
 		
 	}
 	
