@@ -11,6 +11,6 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('@performance:music_not_performing', 0)
 		return
 
-	actor.stopPerformance()#FIXME: Deprecated method
-	actor.sendSystemMessage('@performance:music_stop_self', 0)
+	entSvc.stopPerformance(actor)
+	#actor.sendSystemMessage('@performance:music_stop_self', 0)
 	return

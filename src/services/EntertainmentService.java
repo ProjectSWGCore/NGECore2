@@ -1,7 +1,9 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -719,6 +721,27 @@ public class EntertainmentService implements INetworkDispatch {
 		}
 	}
 	
+	public void stopPerformance(CreatureObject actor)
+	{
+		Performance performance = getPerformanceByIndex(actor.getPerformanceId());
+		
+		actor.setPerformanceId(0);
+		actor.setPerformanceCounter(0);
+		actor.setCurrentAnimation("");//I think the animation should be some sort of idle animation.
+		
+		actor.cancelEntertainerExperience();
+		
+		String performanceType = (performance.getType() == DANCE)? "dance" : "music";
+		
+	   // actor.sendSystemMessage(String.format("@performance:%s_stop_self", performanceType), (byte)0);//FIXME: This hasn't been sending the correct message
+	    stopAudience(actor);
+
+		if (actor.isPerforming()) {
+			actor.setPerforming(false);
+		}
+		actor.setPosture((byte) 0x0);
+	}
+	
 	public void startPerformanceExperience(final CreatureObject entertainer) {
 		final ScheduledFuture<?> experienceTask = scheduler.scheduleAtFixedRate(() -> {
 			try {
@@ -800,6 +823,49 @@ public class EntertainmentService implements INetworkDispatch {
 
 	}
 	
+	public void stopAudience(CreatureObject actor)
+	{
+		synchronized(actor.getMutex()) {
+			if (actor.getPerformanceAudience() == null) {
+				return;
+			}
+			
+			String performanceType = actor.getPerformanceType();
+			Iterator<CreatureObject> it = actor.getPerformanceAudience().iterator();
+			
+			while (it.hasNext()) {
+				CreatureObject next = it.next();
+				
+				if (((performanceType.equals("dance")) && (next.getPerformanceWatchee() != actor))
+				|| ((performanceType.equals("music")) && (next.getPerformanceListenee() != actor))) {
+					continue;
+				}
+				
+				if (performanceType.equals("dance")) {
+					next.setPerformanceWatchee(null);
+				} else if (performanceType.equals("musci")) {
+					next.setPerformanceListenee(null);
+				}
+				
+				//this may be a bit dodgy.
+				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
+				
+				if (!isEntertained) {
+					next.setMoodAnimation("");
+				}
+				
+				if (next == actor) {
+					continue;
+				}
+				
+				
+				next.sendSystemMessage("@performance:" + performanceType  + "_stop_other", (byte)0);
+			}
+			
+			actor.getPerformanceAudience().clear();
+			//performanceAudience = new ArrayList<CreatureObject>();
+		}
+	}
 	public void performFlourish(final CreatureObject performer, int flourish) {
 		// FIXME There wasn't a limit on flourishes; they just queued up.
 		if (performer.getFlourishCount() > 0 || performer.isPerformingFlourish()) {
