@@ -1,9 +1,12 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -13,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
+import org.apache.commons.collections.iterators.EntrySetMapIterator;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -49,10 +53,13 @@ public class EntertainmentService implements INetworkDispatch {
 
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
+    private static final int SONG = 866729052;
+    private static final int DANCE = -1788534963;
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
-	private ConcurrentHashMap<String,Performance> performances = new ConcurrentHashMap<String,Performance>();
+	private ConcurrentHashMap<PerformanceUID,Performance> performances = new ConcurrentHashMap<PerformanceUID,Performance>();
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
 	
@@ -68,6 +75,9 @@ public class EntertainmentService implements INetworkDispatch {
 		this.core = core;
 		populateSkillCaps();
 		populatePerformanceTable();
+		
+		System.out.printf("[DEBUG] number_of_performances: %d\n", performances.size());
+		
 		populatePerformanceEffects();
 		registerCommands();
 		loadCharacterCustomizationData();
@@ -437,13 +447,21 @@ public class EntertainmentService implements INetworkDispatch {
 				if (p.getType() == -1788534963) {
 					danceMap.put(new Integer(p.getDanceVisualId()), p);
 				}
-				performances.put(p.getPerformanceName(), p);
+				performances.put(new PerformanceUID(p.getPerformanceName(), p.getInstrumentAudioId()), p);
 				performancesByIndex.put(r, p);
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		
+		//TODO: Remove
+		Set<PerformanceUID> debugSet = performances.keySet();
+		for(PerformanceUID uid : debugSet)
+		{
+			System.out.println(uid.toString());
+		}
+		
 	}
 	
 	private void populateSkillCaps() {
@@ -608,13 +626,15 @@ public class EntertainmentService implements INetworkDispatch {
 		}*/
 	}
 	
+	//FIXME: Refactor using new map --Complete--
 	public int getDanceVisualId(String danceName) {
-		Performance p = performances.get(danceName);
+		Performance p = getPerformance(danceName, 0);
 		
 		//if 0 , then it's no dance. need to handle that in the script.
 		return ((p == null) ? 0 : p.getDanceVisualId());
 	}
 	
+	//FIXME: Refactor using new map ?? Perhaps not ??
 	public Map<Long,String> getAvailableDances(CreatureObject actor) {
 		
 		Map<Long,String> dances = new HashMap<Long, String>();
@@ -627,6 +647,23 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
+	public Map<Long, String> getAvailableSongs(CreatureObject actor, int instrumentCode)
+	{
+		Map<Long, String> songs = new HashMap<Long, String>();
+		for(Performance performance : performances.values())
+		{
+			if(performance.getInstrumentAudioId() == instrumentCode)
+			{
+				if(canPerform(actor, performance))
+				{
+					songs.put(new Long(performance.getLineNumber()), performance.getPerformanceName());
+				}
+			}
+		}
+		return songs;
+	}
+	
+	//FIXME: if visualId > 0 then it is a dance...
 	public boolean isDance(int visualId) {
 		return ( danceMap.get(visualId) != null ) ;
 	}
@@ -638,17 +675,31 @@ public class EntertainmentService implements INetworkDispatch {
 		return false;
 	}
 	
+	
 	public boolean canDance(CreatureObject actor, int visualId) {
 		if (!isDance(visualId)) { return false; }
 		return canDance(actor, danceMap.get(visualId));
+	}
+	
+	public boolean canPerform(CreatureObject actor, Performance performance)
+	{
+		if(performance.getRequiredInstrument() != null)
+		{
+			boolean hasInstrument = actor.hasAbility(performance.getRequiredInstrument());
+			boolean hasSong = actor.hasAbility(performance.getRequiredSong());
+			return  hasInstrument && hasSong;
+		}
+		else return actor.hasAbility(performance.getRequiredDance());
 	}
 
 	public Performance getDance(int visualId) {
 		return danceMap.get(visualId);
 	}
 	
-	public Performance getPerformance(String name) {
-		return performances.get(name);
+	//FIXME: Refactor using new map -COMPLETE-
+	//FIXME: Returning null for known combination... - fixed?
+	public Performance getPerformance(String name, int instrumentAudioId) {
+		return performances.get(new PerformanceUID(name, instrumentAudioId));
 	}
 	
 	public Performance getPerformanceByIndex(int index) {
@@ -668,6 +719,27 @@ public class EntertainmentService implements INetworkDispatch {
 		if (!actor.isPerforming()) {
 			actor.setPerforming(true);
 		}
+	}
+	
+	public void stopPerformance(CreatureObject actor)
+	{
+		Performance performance = getPerformanceByIndex(actor.getPerformanceId());
+		
+		actor.setPerformanceId(0);
+		actor.setPerformanceCounter(0);
+		actor.setCurrentAnimation("");//I think the animation should be some sort of idle animation.
+		
+		actor.cancelEntertainerExperience();
+		
+		String performanceType = (performance.getType() == DANCE)? "dance" : "music";
+		
+	   actor.sendSystemMessage(String.format("@performance:%s_stop_self", performanceType), (byte)0);//FIXME: This hasn't been sending the correct message
+	    stopAudience(actor);
+
+		if (actor.isPerforming()) {
+			actor.setPerforming(false);
+		}
+		actor.setPosture((byte) 0x0);
 	}
 	
 	public void startPerformanceExperience(final CreatureObject entertainer) {
@@ -751,12 +823,56 @@ public class EntertainmentService implements INetworkDispatch {
 
 	}
 	
+	public void stopAudience(CreatureObject actor)
+	{
+		synchronized(actor.getMutex()) {
+			if (actor.getPerformanceAudience() == null) {
+				return;
+			}
+			
+			String performanceType = actor.getPerformanceType();
+			Iterator<CreatureObject> it = actor.getPerformanceAudience().iterator();
+			
+			while (it.hasNext()) {
+				CreatureObject next = it.next();
+				
+				if (((performanceType.equals("dance")) && (next.getPerformanceWatchee() != actor))
+				|| ((performanceType.equals("music")) && (next.getPerformanceListenee() != actor))) {
+					continue;
+				}
+				
+				if (performanceType.equals("dance")) {
+					next.setPerformanceWatchee(null);
+				} else if (performanceType.equals("musci")) {
+					next.setPerformanceListenee(null);
+				}
+				
+				//this may be a bit dodgy.
+				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
+				
+				if (!isEntertained) {
+					next.setMoodAnimation("");
+				}
+				
+				if (next == actor) {
+					continue;
+				}
+				
+				
+				next.sendSystemMessage("@performance:" + performanceType  + "_stop_other", (byte)0);
+			}
+			
+			actor.getPerformanceAudience().clear();
+			//performanceAudience = new ArrayList<CreatureObject>();
+		}
+	}
 	public void performFlourish(final CreatureObject performer, int flourish) {
 		// FIXME There wasn't a limit on flourishes; they just queued up.
 		if (performer.getFlourishCount() > 0 || performer.isPerformingFlourish()) {
 			performer.sendSystemMessage("@performance:flourish_wait_self", (byte) 0);
 			return;
 		}
+		//FIXME: I don't think this will work.
 		Performance performance = getPerformanceByIndex(performer.getPerformanceId());
 
 		if(performance == null)
@@ -987,9 +1103,70 @@ public class EntertainmentService implements INetworkDispatch {
 		return 0;
 	}
 	
+	/**
+	 * @param actor Player
+	 * @return SWGObject equipped in the player's right hand
+	 */
+	public SWGObject getInstrument(CreatureObject actor)
+	{
+		return actor.getSlottedObject("hold_r");
+	}
+	
 	@Override
 	public void shutdown() {
 
+	}
+	
+	/**
+	 * @author Glen
+	 * This class serves as a unique id for performances. 
+	 * The performance.iff file is structured very similar to a database, and with that idea in mind
+	 * this helper-class will serve as essentially the primary key of each performance.
+	 */
+	private class PerformanceUID
+	{
+		private final String performanceName;
+		private final int instrumentAudioId;
+		
+		public PerformanceUID(String performanceName, int instrumentAudioId)
+		{
+			this.performanceName = performanceName;
+			this.instrumentAudioId = instrumentAudioId;
+		}
+		
+		public boolean equals(PerformanceUID other) {
+			if(other != null)
+			{
+				if(this.performanceName == other.performanceName && this.instrumentAudioId == other.instrumentAudioId)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj != null && this.getClass() == obj.getClass() && this.performanceName.equals(((PerformanceUID)obj).performanceName) && this.instrumentAudioId == ((PerformanceUID)obj).instrumentAudioId)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return this.performanceName != null ? performanceName.hashCode() * 37 + instrumentAudioId: instrumentAudioId;
+//			int hash = performanceName.hashCode() ^ instrumentAudioId;
+//			return hash;
+		}
+
+		@Override
+		public String toString() {
+			return "PerformanceUID [performanceName=" + performanceName
+					+ ", instrumentAudioId=" + instrumentAudioId + ", hashCode = " + hashCode() + "]";
+		}
+		
 	}
 
 }

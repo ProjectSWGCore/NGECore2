@@ -17,7 +17,8 @@ def addPlanetSpawns(core, planet):
 	cantina = core.objectService.getObject(long(1213343))
 	
 	# Cantina Interior
-	borraSetas = stcSvc.spawnObject('borrasetas', 'tatooine', cantina.getCellByCellNumber(2), float(9.8), float(0.4), float(-1.2), float(0.75), float(0), float(-0.65), float(0))
+	if cantina not None:
+		borraSetas = stcSvc.spawnObject('borrasetas', 'tatooine', cantina.getCellByCellNumber(2), float(9.8), float(0.4), float(-1.2), float(0.75), float(0), float(-0.65), float(0))
 	
 	# Outside
 	aaphKoden = stcSvc.spawnObject('aaphkoden', 'tatooine', long(0), float(129), float(5.0), float(-5399), float(-0.67), float(0.73))

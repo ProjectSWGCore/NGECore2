@@ -4,6 +4,7 @@ from java.util import Vector
 
 def addSpawnArea(core):
 	dynamicGroups = Vector()
-	dynamicGroups.add('adolescent_krayt_wild_1')
+	dynamicGroups.add('imperial')
+	dynamicGroups.add('rebel')
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -2595, 3724, 500, 'talus')
 	return

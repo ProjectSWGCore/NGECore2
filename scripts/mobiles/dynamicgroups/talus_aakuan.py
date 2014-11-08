@@ -16,7 +16,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('aakuan_steward')
 	mobileTemplates.add('aakuan_warder')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('talus_aakuan')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

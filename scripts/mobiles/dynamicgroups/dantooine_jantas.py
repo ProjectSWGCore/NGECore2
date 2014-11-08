@@ -21,8 +21,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('janta_warrior')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
-	dynamicGroup.setName('jantas_nw_group_1')
+	dynamicGroup.setName('dantooine_jantas')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('jantas_nw_group_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_jantas', dynamicGroup)
 	return

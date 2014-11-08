@@ -17,7 +17,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('chunker_punk')
 	mobileTemplates.add('chunker_swindler')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('talus_chunker')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

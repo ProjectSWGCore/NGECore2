@@ -20,6 +20,6 @@ def addDynamicGroup(core):
 	dynamicGroup.setGroupMembersNumber(3)
 	dynamicGroup.setName('corellia_meatlump')
 	dynamicGroup.setMaxSpawns(-1)
-	dynamicGroup.setMinSpawnDistance(60)
+	dynamicGroup.setMinSpawnDistance(150)
 	core.spawnService.addDynamicGroup('corellia_meatlump', dynamicGroup)
 	return

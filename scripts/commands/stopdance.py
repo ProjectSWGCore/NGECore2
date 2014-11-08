@@ -11,5 +11,5 @@ def run(core, actor, target, commandString):
       actor.sendSystemMessage('@performance:dance_not_performing', 0)
       return
 
-    actor.stopPerformance()
+    entSvc.stopPerformance(actor)
     return

@@ -17,7 +17,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('jawa_thief')
 	mobileTemplates.add('jawa_warlord')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('tatooine_jawa')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

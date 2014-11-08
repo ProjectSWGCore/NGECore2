@@ -17,8 +17,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('nightsister_stalker')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-5)
-	dynamicGroup.setName('nightsisters_dyn_1')
+	dynamicGroup.setName('dathomir_nightsister')
 	dynamicGroup.setMaxSpawns(-1)
-	dynamicGroup.setMinSpawnDistance(100)
-	core.spawnService.addDynamicGroup('nightsisters_dyn_1', dynamicGroup)
+	dynamicGroup.setMinSpawnDistance(150)
+	core.spawnService.addDynamicGroup('dathomir_nightsister', dynamicGroup)
 	return

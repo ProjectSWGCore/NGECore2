@@ -11,8 +11,8 @@ def addDynamicGroup(core):
 	mobileTemplates.add('quenker_relic_reaper')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
-	dynamicGroup.setName('quenker_group_south_1')
+	dynamicGroup.setName('dantooine_quenker')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('quenker_group_south_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('dantooine_quenker', dynamicGroup)
 	return

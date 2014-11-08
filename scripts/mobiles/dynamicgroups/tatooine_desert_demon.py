@@ -13,7 +13,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('desert_demon_leader')
 	mobileTemplates.add('desert_demon_marksman')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(15)
+	dynamicGroup.setGroupMembersNumber(5)
 	dynamicGroup.setName('tatooine_desert_demon')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

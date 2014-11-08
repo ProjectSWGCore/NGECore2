@@ -4,6 +4,6 @@ from java.util import Vector
 
 def addSpawnArea(core):
 	dynamicGroups = Vector()
-	dynamicGroups.add('nightsisters_dyn_1')
+	dynamicGroups.add('dathomir_nightsister')
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -4055, -81, 2300, 'dathomir')
 	return
