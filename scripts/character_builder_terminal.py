@@ -1679,7 +1679,7 @@ def scouttrooperArmor(owner, inventory):
 	scouttrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	scouttrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	scouttrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/scout_trooper/shared_armor_scout_trooper_boots.iff", owner.getPlanet())
-	scouttrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/scout_trooper/shared_armor_scout_trooper_belt.iff", owner.getPlanet())	
+	scouttrooper_belt = core.objectService.createObject("object/tangible/wearables/armor/scout_trooper/shared_armor_scout_trooper_belt.iff", owner.getPlanet())	
 	scouttrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/scout_trooper/shared_armor_scout_trooper_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(scouttrooper_bicep_r);
