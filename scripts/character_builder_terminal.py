@@ -800,8 +800,8 @@ def chitinArmor(owner, inventory):
 	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
-	chitin_boots = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_chitin_s01_boots.iff", owner.getPlanet())
-	chitin_gloves = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_chitin_s01_gloves.iff", owner.getPlanet())											
+	chitin_boots = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_boots.iff", owner.getPlanet())
+	chitin_gloves = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_gloves.iff", owner.getPlanet())											
 	
 	inventory.add(chitin_bicep_r);
 	inventory.add(chitin_bicep_l);
@@ -1057,60 +1057,12 @@ def rebelmarineArmor(owner, inventory):
 	
 def infiltratorArmor(owner, inventory):
 	infiltrator_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_bicep_r.iff", owner.getPlanet())
-	infiltrator_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_bicep_l.iff", owner.getPlanet())
-	infiltrator_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_bracer_r.iff", owner.getPlanet())
-	infiltrator_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_bracer_l.iff", owner.getPlanet())
-	infiltrator_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_leggings = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_leggings.iff", owner.getPlanet())
-	infiltrator_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_helmet = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_helmet.iff", owner.getPlanet())
-	infiltrator_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	infiltrator_chest = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_chest_plate.iff", owner.getPlanet())
-	infiltrator_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);	
 	infiltrator_belt = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_belt.iff", owner.getPlanet())						
 	infiltrator_boots = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_boots.iff", owner.getPlanet())
 	infiltrator_gloves = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_gloves.iff", owner.getPlanet())
@@ -1122,6 +1074,7 @@ def infiltratorArmor(owner, inventory):
 	inventory.add(infiltrator_leggings);
 	inventory.add(infiltrator_helmet);
 	inventory.add(infiltrator_chest);
+	inventory.add(infiltrator_belt);
 	inventory.add(infiltrator_boots);
 	inventory.add(infiltrator_gloves);
 	screenOne(core, owner)
