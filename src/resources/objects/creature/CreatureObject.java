@@ -368,6 +368,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		if (getPosture() == resources.datatables.Posture.SkillAnimating) {
 			stopPerformance();
+			//NGECore.getInstance().entertainmentService.stopPerformance(this);//FIXME: Maximum recursion.
 		}
 		
 		if (getPosture() == posture) {
@@ -1050,6 +1051,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		this.entertainerExperience = entertainerExperience;
 	}
 	
+	public void cancelEntertainerExperience()
+	{
+		synchronized(objectMutex) {
+			if (entertainerExperience != null) {
+				entertainerExperience.cancel(true);
+				entertainerExperience = null;
+			}
+		}
+	}
+	
 	public ScheduledFuture<?> getInspirationTick() {
 		return inspirationTick;
 	}
@@ -1104,6 +1115,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		setListenToId((performanceListenee == null) ? 0L : performanceListenee.getObjectID());
+	}
+	
+	public ArrayList<CreatureObject> getPerformanceAudience()
+	{
+		return new ArrayList<CreatureObject>(performanceAudience);
 	}
 	
 	public int getFlourishCount() {
@@ -1588,7 +1604,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	@Deprecated // FIXME Objects aren't meant for functionality
+	@Deprecated // FIXME Objects aren't meant for functionality. Instead use EntertainmentService.stopPerformance()
 	public void stopPerformance() {
 		setPerformanceId(0);
 		setPerformanceCounter(0);
@@ -1601,7 +1617,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			}
 		}
 		
-	    sendSystemMessage("@performance:" + getPerformanceType()  + "_stop_self", (byte)0);
+	    //sendSystemMessage("@performance:" + getPerformanceType()  + "_stop_self", (byte)0);
 	    stopAudience();
 
 		if (isPerforming()) {
@@ -1609,7 +1625,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	@Deprecated // FIXME Objects aren't meant for functionality
+	@Deprecated // FIXME Objects aren't meant for functionality. Instead use EntertainmentService.stopAudience()
 	public void stopAudience() {
 		synchronized(objectMutex) {
 			if (performanceAudience == null) {
