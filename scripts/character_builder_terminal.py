@@ -1572,62 +1572,15 @@ def risArmor(owner, inventory):
 	
 def rebelsnowArmor(owner, inventory):
 	rebelsnow_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_bicep_r.iff", owner.getPlanet())
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_bicep_l.iff", owner.getPlanet())
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_bracer_r.iff", owner.getPlanet())
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_bracer_l.iff", owner.getPlanet())
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_leggings = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_leggings.iff", owner.getPlanet())
-	rebelsnow_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_helmet = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_helmet.iff", owner.getPlanet())
-	rebelsnow_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	rebelsnow_chest = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_chest_plate.iff", owner.getPlanet())
-	rebelsnow_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	rebelsnow_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	rebelsnow_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	rebelsnow_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	rebelsnow_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	rebelsnow_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	rebelsnow_boots = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_boots.iff", owner.getPlanet())
-	rebelsnow_gloves = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_gloves.iff", owner.getPlanet())	
+	rebelsnow_gloves = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_gloves.iff", owner.getPlanet())
+	rebelsnow_belt = core.objectService.createObject("object/tangible/wearables/armor/rebel_snow/shared_armor_rebel_snow_belt.iff", owner.getPlanet())		
 											
 	inventory.add(rebelsnow_bicep_r);
 	inventory.add(rebelsnow_bicep_l);
@@ -1638,68 +1591,22 @@ def rebelsnowArmor(owner, inventory):
 	inventory.add(rebelsnow_chest);
 	inventory.add(rebelsnow_boots);
 	inventory.add(rebelsnow_gloves);
+	inventory.add(rebelsnow_belt);
 	screenOne(core, owner)
 	return
 	
 	
 def stormtrooperArmor(owner, inventory):
 	stormtrooper_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bicep_r.iff", owner.getPlanet())
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bicep_l.iff", owner.getPlanet())
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bracer_r.iff", owner.getPlanet())
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bracer_l.iff", owner.getPlanet())
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_leggings = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_leggings.iff", owner.getPlanet())
-	stormtrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_helmet = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_helmet.iff", owner.getPlanet())
-	stormtrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	stormtrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_chest_plate.iff", owner.getPlanet())
-	stormtrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	stormtrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	stormtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	stormtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	stormtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	stormtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	stormtrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_boots.iff", owner.getPlanet())
-	stormtrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_gloves.iff", owner.getPlanet())	
+	stormtrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_gloves.iff", owner.getPlanet())
+	stormtrooper_belt = core.objectService.createObject("object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_belt.iff", owner.getPlanet())	
 											
 	inventory.add(stormtrooper_bicep_r);
 	inventory.add(stormtrooper_bicep_l);
@@ -1710,6 +1617,7 @@ def stormtrooperArmor(owner, inventory):
 	inventory.add(stormtrooper_chest);
 	inventory.add(stormtrooper_boots);
 	inventory.add(stormtrooper_gloves);
+	inventory.add(stormtrooper_belt);
 	screenOne(core, owner)
 	return
 	
