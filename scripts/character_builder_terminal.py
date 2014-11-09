@@ -233,7 +233,7 @@ def	armorHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, armorHandlerCallback)
-	window.addListBoxMenuItem('Assault Trooper', 0)
+	window.addListBoxMenuItem('Shock Trooper', 0)
 	window.addListBoxMenuItem('Bone', 1)
 	window.addListBoxMenuItem('Bounty Hunter', 2)
 	window.addListBoxMenuItem('Chitin', 3)
@@ -271,7 +271,7 @@ def armorHandlerCallback(owner, window, eventType, returnList):
 		return
 		
 	if returnList.get(0)=='0':
-		assaulttrooperArmor(owner, inventory)
+		shocktrooperArmor(owner, inventory)
 		return
 	if returnList.get(0)=='1':
 		boneArmor(owner, inventory)
@@ -292,7 +292,7 @@ def armorHandlerCallback(owner, window, eventType, returnList):
 		deathtrooperArmor(owner, inventory)
 		return
 	if returnList.get(0)=='7':
-		galacticmarineArmor(owner, inventory)
+		rebelmarineArmor(owner, inventory)
 		return
 	if returnList.get(0)=='8':
 		infiltratorArmor(owner, inventory)
@@ -529,7 +529,7 @@ def meleeWeapons(owner, inventory):
 	return
 	
 	
-def assaulttrooperArmor(owner, inventory):
+def shocktrooperArmor(owner, inventory):
 	assaulttrooper_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_assault_trooper_bicep_r.iff", owner.getPlanet())
 	assaulttrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	assaulttrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
@@ -657,8 +657,8 @@ def boneArmor(owner, inventory):
 	bone_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	bone_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bone_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
-	bone_boots = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_bone_s01_boots.iff", owner.getPlanet())
-	bone_gloves = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_bone_s01_gloves.iff", owner.getPlanet())	
+	bone_boots = core.objectService.createObject("object/tangible/wearables/armor/bone/shared_armor_bone_s01_boots.iff", owner.getPlanet())
+	bone_gloves = core.objectService.createObject("object/tangible/wearables/armor/bone/shared_armor_bone_s01_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(bone_bicep_r);
 	inventory.add(bone_bicep_l);
@@ -673,7 +673,7 @@ def boneArmor(owner, inventory):
 	return
 	
 def bountyhunterArmor(owner, inventory):
-	bountyhunter_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_bicep_r.iff", owner.getPlanet())
+	bountyhunter_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_bicep_r.iff", owner.getPlanet())
 	bountyhunter_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -681,7 +681,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-	bountyhunter_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_bicep_l.iff", owner.getPlanet())
+	bountyhunter_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_bicep_l.iff", owner.getPlanet())
 	bountyhunter_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -689,7 +689,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-	bountyhunter_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_bracer_r.iff", owner.getPlanet())
+	bountyhunter_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_bracer_r.iff", owner.getPlanet())
 	bountyhunter_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -697,7 +697,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-	bountyhunter_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_bracer_l.iff", owner.getPlanet())
+	bountyhunter_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_bracer_l.iff", owner.getPlanet())
 	bountyhunter_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -705,7 +705,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-	bountyhunter_leggings = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_leggings.iff", owner.getPlanet())
+	bountyhunter_leggings = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_leggings.iff", owner.getPlanet())
 	bountyhunter_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -713,7 +713,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-	bountyhunter_helmet = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_helmet.iff", owner.getPlanet())
+	bountyhunter_helmet = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_helmet.iff", owner.getPlanet())
 	bountyhunter_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
@@ -721,15 +721,15 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 					
-	bountyhunter_chest = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_chest_plate.iff", owner.getPlanet())
+	bountyhunter_chest = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_chest_plate.iff", owner.getPlanet())
 	bountyhunter_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	bountyhunter_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
-	bountyhunter_boots = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_boots.iff", owner.getPlanet())
-	bountyhunter_gloves = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_gloves.iff", owner.getPlanet())	
+	bountyhunter_boots = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_boots.iff", owner.getPlanet())
+	bountyhunter_gloves = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(bountyhunter_bicep_r);
 	inventory.add(bountyhunter_bicep_l);
@@ -743,7 +743,79 @@ def bountyhunterArmor(owner, inventory):
 	screenOne(core, owner)
 	return
 	
+
+def chitinArmor(owner, inventory):
+	chitin_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bicep_r.iff", owner.getPlanet())
+	chitin_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bicep_l.iff", owner.getPlanet())
+	chitin_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bracer_r.iff", owner.getPlanet())
+	chitin_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bracer_l.iff", owner.getPlanet())
+	chitin_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_leggings = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_leggings.iff", owner.getPlanet())
+	chitin_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_helmet = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_helmet.iff", owner.getPlanet())
+	chitin_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+	chitin_chest = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_chest_plate.iff", owner.getPlanet())
+	chitin_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	chitin_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
+	chitin_boots = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_chitin_s01_boots.iff", owner.getPlanet())
+	chitin_gloves = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_chitin_s01_gloves.iff", owner.getPlanet())											
 	
+	inventory.add(chitin_bicep_r);
+	inventory.add(chitin_bicep_l);
+	inventory.add(chitin_bracer_r);
+	inventory.add(chitin_bracer_l);
+	inventory.add(chitin_leggings);
+	inventory.add(chitin_helmet);
+	inventory.add(chitin_chest);
+	inventory.add(chitin_boots);
+	inventory.add(chitin_gloves);
+	screenOne(core, owner)
+	return
+	
+		
 def compositeArmor(owner, inventory):
 	comp_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", owner.getPlanet())
 	comp_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -911,7 +983,7 @@ def deathtrooperArmor(owner, inventory):
 	return
 	
 		
-def galacticmarineArmor(owner, inventory):
+def rebelmarineArmor(owner, inventory):
 	marine_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marine/shared_armor_marine_bicep_r.iff", owner.getPlanet())
 	marine_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	marine_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
@@ -1038,9 +1110,10 @@ def infiltratorArmor(owner, inventory):
 	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
 	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
+	infiltrator_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);	
+	infiltrator_belt = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_belt.iff", owner.getPlanet())						
 	infiltrator_boots = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_boots.iff", owner.getPlanet())
-	infiltrator_gloves = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_gloves.iff", owner.getPlanet())	
+	infiltrator_gloves = core.objectService.createObject("object/tangible/wearables/armor/infiltrator/shared_armor_infiltrator_s01_gloves.iff", owner.getPlanet())
 											
 	inventory.add(infiltrator_bicep_r);
 	inventory.add(infiltrator_bicep_l);
@@ -1058,6 +1131,7 @@ def infiltratorArmor(owner, inventory):
 def ithoriandefenderArmor(owner, inventory):
 	ithoriandefender_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bicep_r.iff", owner.getPlanet())
 	ithoriandefender_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bicep_l.iff", owner.getPlanet())
+	ithoriandefender_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bracer_r.iff", owner.getPlanet())
 	ithoriandefender_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bracer_l.iff", owner.getPlanet())
 	ithoriandefender_leggings = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_leggings.iff", owner.getPlanet())
 	ithoriandefender_helmet = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_helmet.iff", owner.getPlanet())
@@ -1081,6 +1155,7 @@ def ithoriandefenderArmor(owner, inventory):
 def kashyyykianblackmountainArmor(owner, inventory):
 	kashyyykianblackmountain_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_r.iff", owner.getPlanet())
 	kashyyykianblackmountain_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_l.iff", owner.getPlanet())
+	kashyyykianblackmountain_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bracer_r.iff", owner.getPlanet())
 	kashyyykianblackmountain_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bracer_l.iff", owner.getPlanet())
 	kashyyykianblackmountain_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_leggings.iff", owner.getPlanet())
 	kashyyykianblackmountain_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_helmet.iff", owner.getPlanet())
@@ -1104,6 +1179,7 @@ def kashyyykianblackmountainArmor(owner, inventory):
 def kashyyykianceremonialArmor(owner, inventory):
 	kashyyykianceremonial_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bicep_r.iff", owner.getPlanet())
 	kashyyykianceremonial_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bicep_l.iff", owner.getPlanet())
+	kashyyykianceremonial_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bracer_r.iff", owner.getPlanet())
 	kashyyykianceremonial_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bracer_l.iff", owner.getPlanet())
 	kashyyykianceremonial_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_leggings.iff", owner.getPlanet())
 	kashyyykianceremonial_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_helmet.iff", owner.getPlanet())
@@ -1127,6 +1203,7 @@ def kashyyykianceremonialArmor(owner, inventory):
 def kashyyykianhuntingArmor(owner, inventory):
 	kashyyykianhunting_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bicep_r.iff", owner.getPlanet())
 	kashyyykianhunting_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bicep_l.iff", owner.getPlanet())
+	kashyyykianhunting_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bracer_r.iff", owner.getPlanet())
 	kashyyykianhunting_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bracer_l.iff", owner.getPlanet())
 	kashyyykianhunting_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_leggings.iff", owner.getPlanet())
 	kashyyykianhunting_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_helmet.iff", owner.getPlanet())
@@ -1222,6 +1299,7 @@ def mandalorianArmor(owner, inventory):
 def mandalorianimperialArmor(owner, inventory):
 	mandalorianimperial_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_bicep_r.iff", owner.getPlanet())
 	mandalorianimperial_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_bicep_l.iff", owner.getPlanet())
+	mandalorianimperial_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_bracer_r.iff", owner.getPlanet())
 	mandalorianimperial_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_bracer_l.iff", owner.getPlanet())
 	mandalorianimperial_leggings = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_leggings.iff", owner.getPlanet())
 	mandalorianimperial_helmet = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_imperial/shared_armor_mandalorian_imperial_helmet.iff", owner.getPlanet())
@@ -1245,6 +1323,7 @@ def mandalorianimperialArmor(owner, inventory):
 def mandalorianrebelArmor(owner, inventory):
 	mandalorianrebel_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_bicep_r.iff", owner.getPlanet())
 	mandalorianrebel_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_bicep_l.iff", owner.getPlanet())
+	mandalorianrebel_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_bracer_r.iff", owner.getPlanet())
 	mandalorianrebel_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_bracer_l.iff", owner.getPlanet())
 	mandalorianrebel_leggings = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_leggings.iff", owner.getPlanet())
 	mandalorianrebel_helmet = core.objectService.createObject("object/tangible/wearables/armor/mandalorian_rebel/shared_armor_mandalorian_rebel_helmet.iff", owner.getPlanet())
@@ -1268,6 +1347,7 @@ def mandalorianrebelArmor(owner, inventory):
 def marauderassaultArmor(owner, inventory):
 	marauderassault_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bicep_r.iff", owner.getPlanet())
 	marauderassault_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bicep_l.iff", owner.getPlanet())
+	marauderassault_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bracer_l.iff", owner.getPlanet())
 	marauderassault_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bracer_l.iff", owner.getPlanet())
 	marauderassault_leggings = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_leggings.iff", owner.getPlanet())
 	marauderassault_helmet = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_helmet.iff", owner.getPlanet())
@@ -1291,6 +1371,7 @@ def marauderassaultArmor(owner, inventory):
 def marauderbattleArmor(owner, inventory):
 	marauderbattle_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bicep_r.iff", owner.getPlanet())
 	marauderbattle_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bicep_l.iff", owner.getPlanet())
+	marauderbattle_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bracer_r.iff", owner.getPlanet())
 	marauderbattle_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bracer_l.iff", owner.getPlanet())
 	marauderbattle_leggings = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_leggings.iff", owner.getPlanet())
 	marauderbattle_helmet = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_helmet.iff", owner.getPlanet())
@@ -1314,6 +1395,7 @@ def marauderbattleArmor(owner, inventory):
 def marauderreconArmor(owner, inventory):
 	marauderrecon_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_bicep_r.iff", owner.getPlanet())
 	marauderrecon_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_bicep_l.iff", owner.getPlanet())
+	marauderrecon_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_bracer_r.iff", owner.getPlanet())
 	marauderrecon_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_bracer_l.iff", owner.getPlanet())
 	marauderrecon_leggings = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_leggings.iff", owner.getPlanet())
 	marauderrecon_helmet = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s03_helmet.iff", owner.getPlanet())
@@ -1337,6 +1419,7 @@ def marauderreconArmor(owner, inventory):
 def paddedArmor(owner, inventory):
 	padded_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bicep_r.iff", owner.getPlanet())
 	padded_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bicep_l.iff", owner.getPlanet())
+	padded_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bracer_r.iff", owner.getPlanet())
 	padded_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bracer_l.iff", owner.getPlanet())
 	padded_leggings = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_leggings.iff", owner.getPlanet())
 	padded_helmet = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_helmet.iff", owner.getPlanet())
@@ -1720,6 +1803,7 @@ def snowtrooperArmor(owner, inventory):
 def tantelArmor(owner, inventory):
 	tantel_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_bicep_r.iff", owner.getPlanet())
 	tantel_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_bicep_l.iff", owner.getPlanet())
+	tantel_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_bracer_r.iff", owner.getPlanet())
 	tantel_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_bracer_l.iff", owner.getPlanet())
 	tantel_leggings = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_leggings.iff", owner.getPlanet())
 	tantel_helmet = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_helmet.iff", owner.getPlanet())
