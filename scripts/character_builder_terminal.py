@@ -1405,7 +1405,7 @@ def mandalorianrebelArmor(owner, inventory):
 def marauderassaultArmor(owner, inventory):
 	marauderassault_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bicep_r.iff", owner.getPlanet())
 	marauderassault_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bicep_l.iff", owner.getPlanet())
-	marauderassault_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bracer_l.iff", owner.getPlanet())
+	marauderassault_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bracer_r.iff", owner.getPlanet())
 	marauderassault_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_bracer_l.iff", owner.getPlanet())
 	marauderassault_leggings = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_leggings.iff", owner.getPlanet())
 	marauderassault_helmet = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s01_helmet.iff", owner.getPlanet())
