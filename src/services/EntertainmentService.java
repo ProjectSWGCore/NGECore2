@@ -874,7 +874,7 @@ public class EntertainmentService implements INetworkDispatch {
 			performer.sendSystemMessage("@performance:flourish_wait_self", (byte) 0);
 			return;
 		}
-		//FIXME: I don't think this will work.
+		
 		Performance performance = getPerformanceByIndex(performer.getPerformanceId());
 
 		if(performance == null)
@@ -889,6 +889,7 @@ public class EntertainmentService implements INetworkDispatch {
 		performer.setPerformingFlourish(true);
 		performer.sendSystemMessage("@performance:flourish_perform", (byte) 0);
 		performer.doSkillAnimation(anmFlo);
+		performer.playMusic(performance.getFlourish1());
 
 		scheduler.schedule(() -> {
 			try {
@@ -1112,6 +1113,50 @@ public class EntertainmentService implements INetworkDispatch {
 	public SWGObject getInstrument(CreatureObject actor)
 	{
 		return actor.getSlottedObject("hold_r");
+	}
+	
+	/**
+	 * @param actor
+	 * @return The InstrumentAudioId of the instrument being played or zero if there is no instrument being played
+	 */
+	public int getInstrumentAudioId(CreatureObject actor)
+	{
+		SWGObject instrument = getInstrument(actor);
+		if(instrument != null)
+		{
+			switch(instrument.getStfName())
+			{
+			case "obj_traz_classic":
+				return 1;
+			case "obj_slitherhorn_classic":
+				return 2;
+			case "obj_fanfar_classic":
+				return 3;
+			case "obj_chidinkalu_horn_classic"://FIXME: Not 100% certain on this one, but I think it's flootdroopy
+				return 4;
+			case "obj_kloo_horn_classic":
+				return 5;
+			case "obj_fizzz_classic":
+				return 6;
+			case "obj_bandfill_classic":
+				return 7;
+			case "obj_modoviol_classic":
+				return 10;
+			case "obj_xanta_n":
+				return 11;
+			case "obj_jessoon":
+				return 12;
+			case "obj_valahorn":
+				return 13;
+			default:
+				break;
+			}			
+		}
+		//TODO: The following instruments are placed and then played instead of being held.
+		//TODO: omnibox audioID is 8.
+		//TODO: nargalon audioID is 9.
+		//TODO: downeybox audioID is 14. 
+		return 0;
 	}
 	
 	@Override
