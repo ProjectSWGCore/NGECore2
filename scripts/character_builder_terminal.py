@@ -2015,8 +2015,13 @@ def GCWKerenTravel(owner):
 	return
 	
 def GCWBestineTravel(owner):
-	position = Point3D(-1385,12, -3597)
+	position = Point3D(-1385, 12, -3597)
 	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("tatooine"), position, owner.getOrientation(), None)
+	return
+	
+def QuarantineZoneTravel(owner):
+	position = Point3D(-5789, 511, -6558)
+	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("dathomir"), position, owner.getOrientation(), None)
 	return
 
 def surveyDevices(owner, inventory):

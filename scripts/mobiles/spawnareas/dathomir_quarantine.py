@@ -9,4 +9,5 @@ def addSpawnArea(core):
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -5850, -6400, 100, 'dathomir')
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -5800, -6500, 100, 'dathomir')
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -5600, -6525, 100, 'dathomir')
+	core.spawnService.addDynamicSpawnArea(dynamicGroups, -5850, -6725, 530, 'dathomir')
 	return
