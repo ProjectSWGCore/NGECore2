@@ -305,7 +305,7 @@ def	miscHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, miscHandlerCallback)
-	window.addListBoxMenuItem('Backpack', 0)
+	window.addListBoxMenuItem('Instrument', 0)
 	window.addListBoxMenuItem('Heroism Jewelry Set', 1)	
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
 	window.addListBoxMenuItem('Starter Equipment Box', 3)
@@ -321,7 +321,7 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 		return
 		
 	if returnList.get(0)=='0':
-		backpack(owner, inventory)
+		instrument(owner, inventory)
 		return
 	if returnList.get(0)=='1':
 		heroismJewelry(owner, inventory)
@@ -1299,8 +1299,8 @@ def jediBelt(owner, inventory):
 	screenOne(core, owner)
 	return
 	
-def backpack(owner, inventory):
-	# inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
+def instrument(owner, inventory):
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_slitherhorn.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 
