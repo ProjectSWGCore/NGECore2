@@ -1083,12 +1083,68 @@ def infiltratorArmor(owner, inventory):
 	
 def ithoriandefenderArmor(owner, inventory):
 	ithoriandefender_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bicep_r.iff", owner.getPlanet())
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bicep_l.iff", owner.getPlanet())
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bracer_r.iff", owner.getPlanet())
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bracer_l.iff", owner.getPlanet())
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
+	ithoriandefender_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bracer_l.iff", owner.getPlanet())
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_leggings = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_leggings.iff", owner.getPlanet())
+	ithoriandefender_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_helmet = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_helmet.iff", owner.getPlanet())
+	ithoriandefender_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	ithoriandefender_chest = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_chest_plate.iff", owner.getPlanet())
+	ithoriandefender_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	ithoriandefender_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	ithoriandefender_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	ithoriandefender_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	ithoriandefender_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	ithoriandefender_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 	ithoriandefender_boots = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_boots.iff", owner.getPlanet())
 	ithoriandefender_gloves = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_gloves.iff", owner.getPlanet())	
 											
@@ -1107,12 +1163,61 @@ def ithoriandefenderArmor(owner, inventory):
 	
 def kashyyykianblackmountainArmor(owner, inventory):
 	kashyyykianblackmountain_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_r.iff", owner.getPlanet())
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_l.iff", owner.getPlanet())
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bracer_r.iff", owner.getPlanet())
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bracer_l.iff", owner.getPlanet())
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_leggings.iff", owner.getPlanet())
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_helmet.iff", owner.getPlanet())
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_chest = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_chest_plate.iff", owner.getPlanet())
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	
 	kashyyykianblackmountain_boots = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_boots.iff", owner.getPlanet())
 	kashyyykianblackmountain_gloves = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_gloves.iff", owner.getPlanet())	
 											
