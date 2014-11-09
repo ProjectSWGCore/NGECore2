@@ -9,7 +9,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper')
+	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') ##TODO: Needs correct stf name
 	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	
@@ -17,7 +17,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(10)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('undead')
-	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setAssistRange(15)
 	mobileTemplate.setRespawnTime(300)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -61,8 +61,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureRangedShot')
-	mobileTemplate.setDefaultAttack('creatureMeleeHit')
+	mobileTemplate.setDefaultAttack('RangedShot')
+	mobileTemplate.setDefaultAttack('MeleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']
@@ -70,20 +70,10 @@ def addTemplate(core):
 	lootGroupChance_1 = 65
 	mobileTemplate.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
 	
-	lootPoolNames_2 = ['jedi_relic_1']
-	lootPoolChances_2 = [100]
-	lootGroupChance_2 = 85
-	mobileTemplate.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
-	
 	lootPoolNames_4 = ['random_stat_jewelry']
 	lootPoolChances_4 = [100]
 	lootGroupChance_4 = 8
 	mobileTemplate.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
-
-	lootPoolNames_5 = ['sithholocrons']
-	lootPoolChances_5 = [100]
-	lootGroupChance_5 = 3
-	mobileTemplate.addToLootGroups(lootPoolNames_5,lootPoolChances_5,lootGroupChance_5)
 	
 	core.spawnService.addMobileTemplate('undead_deathtrooper', mobileTemplate)
 
