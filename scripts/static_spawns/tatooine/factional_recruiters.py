@@ -16,7 +16,7 @@ def addPlanetSpawns(core, planet):
 	
 	#Imp recruiter Eisley
 	smallImpHouse = core.objectService.getObject(long(1280129))
-	if smallImpHouse not None:
+	if smallImpHouse is not None:
 		stcSvc.spawnObject('imperial_recruiter', 'tatooine', smallImpHouse.getCellByCellNumber(3), float(-6), float(1), float(9.2), float(0.71), float(0), float(0.70), float(0))	
 
 	#Imp recruiter Bestine
@@ -29,7 +29,7 @@ def addPlanetSpawns(core, planet):
 	
 	#Anchorhead cantina
 	anchCantina = core.objectService.getObject(long(1213343)) 
-	if anchCantina not None:
+	if anchCantina is not None:
 		stcSvc.spawnObject('rebel_recruiter', 'tatooine', anchCantina.getCellByCellNumber(6), float(-6.1), float(-1.8), float(-6.2), float(0), float(0), float(0), float(-90))		
 	
 	return

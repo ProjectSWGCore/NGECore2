@@ -17,7 +17,7 @@ def addPlanetSpawns(core, planet):
 
 	cave = core.objectService.getObject(long(-466404036409557011))
 	
-	if cave not None:
+	if cave is not None:
 		lifter = stcSvc.spawnObject('object/mobile/shared_cll8_binary_load_lifter.iff', 'tatooine', cave.getCellByCellNumber(2), float(8.8), float(-21.8), float(-38.1), float(0.71), float(0), float(0.70), float(0))	
 		lifter.setCustomName('a Binary Load Lifter')
 		lifter.setOptionsBitmask(Options.INVULNERABLE)

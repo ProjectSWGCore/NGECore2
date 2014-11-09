@@ -8,7 +8,7 @@ def addDynamicGroup(core):
 	mobileTemplates = Vector()
 	mobileTemplates.add('undead_deathtrooper')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(5)
+	dynamicGroup.setGroupMembersNumber(-5)
 	dynamicGroup.setName('dathomir_deathtroopers_1')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(10)

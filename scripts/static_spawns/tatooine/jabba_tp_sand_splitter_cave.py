@@ -15,7 +15,7 @@ def addPlanetSpawns(core, planet):
 	
 	# TODO Check all NPCs for personalized scripting, change format.
 	cave = core.objectService.getObject(long(-466404038393479071))
-	if cave not None:
+	if cave is not None:
 		stcSvc.spawnObject('sand_splitter_knave', 'tatooine', cave.getCellByCellNumber(1), float(42.6), float(-23.3), float(4.9), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('sand_splitter_knave', 'tatooine', cave.getCellByCellNumber(2), float(41.5), float(-34.4), float(-21.8), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('sand_splitter_ruffian', 'tatooine', cave.getCellByCellNumber(2), float(40), float(-37.9), float(-52.7), float(0), float(0), float(0), float(0), 45)

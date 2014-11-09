@@ -100,7 +100,7 @@ def addPlanetSpawns(core, planet):
 	#Eisley Legacy Quest NPCs
 		
 	building = core.objectService.getObject(long(1279956)) 
-	if building not None:
+	if building is not None:
 		mayor = stcSvc.spawnObject('mos_eisley_mayor', 'tatooine', building.getCellByCellNumber(4), float(1.2), float(2.5), float(5.4), float(0), float(0), float(0), float(0))
 	
 	enthaKandela = stcSvc.spawnObject('enthakandela', 'tatooine', long(0), float(3511), float(5.0), float(-4785), float(0.70), float(0.71))
@@ -108,7 +108,7 @@ def addPlanetSpawns(core, planet):
 	purvis = stcSvc.spawnObject('purvisarrison', 'tatooine', long(0), float(3512.4), float(5.0), float(-4764.9), float(0.38), float(-0.92))
 	
 	building = core.objectService.getObject(long(1189630)) 
-	if building not None:
+	if building is not None:
 		peawpRdawc = stcSvc.spawnObject('peawprdawc', 'tatooine', building.getCellByCellNumber(9), float(-11.8), float(1.1), float(-10.1), float(0), float(0), float(0), float(0))
 	
 	nikoBrehe = stcSvc.spawnObject('nikobrehe', 'tatooine', long(0), float(3506.7), float(5.0), float(-4795.8), float(0.70), float(0.71))
@@ -158,7 +158,7 @@ def addPlanetSpawns(core, planet):
 	
 	# Looped Patrol must end in same cell like the start point!!!
 	#building id: 1105845                               Buildingid + cell !
-	if building not None:
+	if building is not None:
 		trehla = stcSvc.spawnObject('trehla', 'tatooine', long(1105845 + 8), float(24.21), float(2.12), float(73.49), float(0.92), float(0), float(-0.38), float(0)) 
 		patrolpointsCells = Vector()   # Vector       Building reference        Patrolpoint                                  CellID                                    
 		aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(25.11), float(2.10), float(50.22)), 7)

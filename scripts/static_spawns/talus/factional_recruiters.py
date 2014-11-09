@@ -16,7 +16,7 @@ def addPlanetSpawns(core, planet):
 
 	#Reb recruiter
 	dearicCantina = core.objectService.getObject(long(3175388))
-	if dearicCantina not None:
+	if dearicCantina is not None:
 		stcSvc.spawnObject('rebel_recruiter', 'talus', dearicCantina.getCellByCellNumber(11), float(-25.8), float(-0.9), float(-0.7), float(0), float(-0.707), float(0), float(0.707))		
 
 	return
