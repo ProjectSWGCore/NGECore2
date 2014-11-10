@@ -9,9 +9,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') #TODO: Needs correct stf name
-	mobileTemplate.setLevel(5)
-	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+	mobileTemplate.setCreatureName('outbreak_afflicted_rancor')
+	mobileTemplate.setLevel(90)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 	
 	mobileTemplate.setMinSpawnDistance(5)
 	mobileTemplate.setMaxSpawnDistance(10)
@@ -22,47 +22,16 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_01_f.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_01_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_02_f.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_03_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_04_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_05_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_06_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_07_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_08_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_09_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_10_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_11_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_12_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_13_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_14_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_15_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_16_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_17_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_18_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_19_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_20_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_21_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_22_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_23_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_24_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_25_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_26_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_27_m.iff')
-	templates.add('object/mobile/shared_outbreak_undead_deathtrooper_28_m.iff')
+	templates.add('object/mobile/shared_mutated_rancor_zombie.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', WeaponType.RIFLE, 0.8, 0, 'energy')
-	weaponTemplates.add(weapontemplate)
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.ONEHANDEDMELEE, 1.0, 4, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('RangedShot')
-	mobileTemplate.setDefaultAttack('MeleeHit')
+	mobileTemplate.setDefaultAttack('creatureMeleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']
@@ -75,6 +44,6 @@ def addTemplate(core):
 	lootGroupChance_4 = 8
 	mobileTemplate.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
 	
-	core.spawnService.addMobileTemplate('undead_deathtrooper', mobileTemplate)
+	core.spawnService.addMobileTemplate('outbreak_afflicted_rancor', mobileTemplate)
 
 	return
