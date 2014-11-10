@@ -9,8 +9,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') #TODO: Needs correct stf name
-	mobileTemplate.setLevel(5)
+	mobileTemplate.setCreatureName('outbreak_afflicted_lvl_20')
+	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	
 	mobileTemplate.setMinSpawnDistance(5)
