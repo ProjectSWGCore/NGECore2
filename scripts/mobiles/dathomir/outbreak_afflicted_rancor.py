@@ -10,7 +10,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('outbreak_afflicted_rancor')
-	mobileTemplate.setLevel(90)
+	mobileTemplate.setLevel(95)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 	
 	mobileTemplate.setMinSpawnDistance(5)
@@ -34,15 +34,10 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
-	lootPoolNames_1 = ['Junk']
+	lootPoolNames_1 = ['rare_crystal_undead_rancor']
 	lootPoolChances_1 = [100]
-	lootGroupChance_1 = 65
+	lootGroupChance_1 = 5
 	mobileTemplate.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
-	
-	lootPoolNames_4 = ['random_stat_jewelry']
-	lootPoolChances_4 = [100]
-	lootGroupChance_4 = 8
-	mobileTemplate.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
 	
 	core.spawnService.addMobileTemplate('outbreak_afflicted_rancor', mobileTemplate)
 

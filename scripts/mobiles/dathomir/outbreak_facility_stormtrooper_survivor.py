@@ -11,16 +11,16 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('outbreak_imperial_officer_gate_keeper')
-	mobileTemplate.setLevel(1)
-	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+	mobileTemplate.setLevel(90)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE)
-	mobileTemplate.setConversationFileName('outbreak_imperial_officer_gate_keeper')
+	mobileTemplate.setOptionsBitmask(Options.CONVERSABLE)
+	mobileTemplate.setConversationFileName('outbreak_imperial_trooper_gate_keeper')
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_officer_m_6.iff')
+	templates.add('object/mobile/shared_stormtrooper.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

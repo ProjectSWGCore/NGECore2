@@ -20,7 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setConversationFileName('outbreak_imperial_officer_gate_keeper')
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_officer_m_6.iff')
+	templates.add('object/mobile/shared_dressed_imperial_officer_firmus_piett.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
