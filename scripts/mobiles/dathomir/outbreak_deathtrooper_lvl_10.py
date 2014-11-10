@@ -9,8 +9,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') #TODO: Needs correct stf name
-	mobileTemplate.setLevel(5)
+	mobileTemplate.setCreatureName('outbreak_deathtrooper_lvl_10')
+	mobileTemplate.setLevel(10)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	
 	mobileTemplate.setMinSpawnDistance(5)
@@ -75,6 +75,6 @@ def addTemplate(core):
 	lootGroupChance_4 = 8
 	mobileTemplate.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
 	
-	core.spawnService.addMobileTemplate('undead_deathtrooper', mobileTemplate)
+	core.spawnService.addMobileTemplate('outbreak_deathtrooper_lvl_10', mobileTemplate)
 
 	return
