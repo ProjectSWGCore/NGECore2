@@ -9,7 +9,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('outbreak_imp_trooper_guard')
+	mobileTemplate.setCreatureName('outbreak_mixed_guard_aggro')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 	
@@ -32,6 +32,6 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('outbreak_imp_trooper_guard', mobileTemplate)
+	core.spawnService.addMobileTemplate('outbreak_mixed_guard_aggro', mobileTemplate)
 
 	return

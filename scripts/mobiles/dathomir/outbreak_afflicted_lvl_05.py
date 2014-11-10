@@ -9,7 +9,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') ##TODO: Needs correct stf name
+	mobileTemplate.setCreatureName('eow_outbreak_undead_deathtrooper') #TODO: Needs correct stf name
 	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	

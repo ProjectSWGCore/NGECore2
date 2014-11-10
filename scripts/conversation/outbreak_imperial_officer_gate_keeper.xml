@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Conversation>
+    <Properties>
+        <zoom>1.0</zoom>
+        <highestId>10</highestId>
+    </Properties>
+    <SceneView version="1.0">
+        <Node locked="true" nodeID="0" optionId="0" posX="72" posY="18" stf="Begin Conversation" targets="4" type="begin"/>
+        <Node locked="false" nodeID="4" optionId="0" posX="633" posY="14" stf="New Conversation Response 4" targets="6" type="response"/>
+        <Node locked="false" nodeID="1" optionId="0" posX="397" posY="528" stf="End Conversation" targets="" type="end"/>
+        <Node locked="false" nodeID="6" optionId="0" posX="656" posY="110" stf="New Conversation Option 6" targets="8" type="option"/>
+        <Node locked="false" nodeID="8" optionId="0" posX="70" posY="99" stf="New Conversation Response 8" targets="" type="response"/>
+    </SceneView>
+</Conversation>
