@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('outbreak_imperial_officer_gate_keeper')
+	mobileTemplate.setCreatureName('outbreak_facility_stormtrooper_survivor')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
@@ -24,7 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 0, 'kinetic')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', WeaponType.RIFLE, 1.0, 0, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -32,5 +32,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('outbreak_imperial_officer_gate_keeper', mobileTemplate)
+	core.spawnService.addMobileTemplate('outbreak_facility_stormtrooper_survivor', mobileTemplate)
 	return

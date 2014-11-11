@@ -1698,60 +1698,12 @@ def scouttrooperArmor(owner, inventory):
 	
 def snowtrooperArmor(owner, inventory):
 	snowtrooper_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_bicep_r.iff", owner.getPlanet())
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	snowtrooper_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_bicep_l.iff", owner.getPlanet())
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	snowtrooper_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_bracer_r.iff", owner.getPlanet())
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	snowtrooper_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_bracer_l.iff", owner.getPlanet())
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	snowtrooper_leggings = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_leggings.iff", owner.getPlanet())
-	snowtrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
 	snowtrooper_helmet = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_helmet.iff", owner.getPlanet())
-	snowtrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-						
-	snowtrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_chest_plate.iff", owner.getPlanet())
-	snowtrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	snowtrooper_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	snowtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	snowtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	snowtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	snowtrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
+	snowtrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_chest_plate.iff", owner.getPlanet())					
 	snowtrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_boots.iff", owner.getPlanet())
 	snowtrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_gloves.iff", owner.getPlanet())	
 											
