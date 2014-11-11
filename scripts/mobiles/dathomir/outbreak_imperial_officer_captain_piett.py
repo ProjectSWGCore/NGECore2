@@ -10,14 +10,14 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('outbreak_imperial_officer_gate_keeper')
+	mobileTemplate.setCreatureName('outbreak_imperial_officer_captain_piett')
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE)
-	mobileTemplate.setConversationFileName('outbreak_imperial_officer_gate_keeper')
+	mobileTemplate.setConversationFileName('outbreak_imperial_officer_captain_piett')
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_imperial_officer_firmus_piett.iff')
@@ -32,5 +32,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('outbreak_imperial_officer_gate_keeper', mobileTemplate)
+	core.spawnService.addMobileTemplate('outbreak_imperial_officer_captain_piett', mobileTemplate)
 	return

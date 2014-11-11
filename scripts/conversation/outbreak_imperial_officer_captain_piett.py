@@ -39,7 +39,6 @@ def handleOptionsTwo(core, actor, npc, selection):
 				# Well, I see. Everything checks out. I can't say that I envy you, but I certainly appreciate what you are doing for the Empire...whatever you are doing.
 				convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/gate_keeper_quarantine_zone:s_19'))
 				
-				# *Teleport to inside the gate*
 				position = Point3D(-5789, 511, -6558)
 				core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("dathomir"), position, owner.getOrientation(), None)
 				convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/gate_keeper_quarantine_zone:s_14'))
