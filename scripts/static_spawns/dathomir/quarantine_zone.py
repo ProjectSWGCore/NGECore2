@@ -10,16 +10,19 @@ def addPlanetSpawns(core, planet):
 	objSvc = core.objectService
 	aiSvc = core.aiService
 
-	# Imperial Gate Guards - Entrance
-	guard1 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5775), float(510), float(-6553), float(0.36), float(0.85))
-	guard2 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5785), float(510), float(-6545), float(0.43), float(0.85))
-	gateofficer1 = stcSvc.spawnObject('outbreak_imperial_officer_gate_keeper', 'dathomir', long(0), float(-5780), float(510), float(-6550), float(0.40), float(0.85))
+	# Imperial Gate Guards - Entrance + General Starting Area
+	guard1 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5775), float(510), float(-6553), float(0.36), float(0.85))
+	guard2 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5785), float(510), float(-6545), float(0.43), float(0.85))
+	guard3 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5745), float(511), float(-6484), float(0.11), float(0.85))
+	guard3 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5744), float(511), float(-6480), float(0.37), float(0.85))
+	liamwaurie1 = stcSvc.spawnObject('outbreak_imperial_officer_gate_keeper', 'dathomir', long(0), float(-5780), float(510), float(-6550), float(0.40), float(0.85))
+	firmuspiett1 = stcSvc.spawnObject('outbreak_imperial_officer_captain_piett', 'dathomir', long(0), float(-5749), float(510), float(-6492), float(0.40), float(0.85))
 	
 	# Imperial Gate Troopers - Exit
-	trooper1 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5793), float(510), float(-6553), float(0.56), float(0.85))
-	trooper2 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5784), float(510), float(-6560), float(0.28), float(0.85))
-	trooper3 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5789), float(510), float(-6562), float(0.23), float(0.85))
-	trooper4 = stcSvc.spawnObject('vic_dark_trooper_80', 'dathomir', long(0), float(-5794), float(510), float(-6557), float(0.32), float(0.85))
+	trooper1 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5793), float(510), float(-6553), float(0.56), float(0.85))
+	trooper2 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5784), float(510), float(-6560), float(0.28), float(0.85))
+	trooper3 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5789), float(510), float(-6562), float(0.23), float(0.85))
+	trooper4 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5794), float(510), float(-6557), float(0.32), float(0.85))
 	exittrooper1 = stcSvc.spawnObject('outbreak_facility_stormtrooper_survivor', 'dathomir', long(0), float(-5783), float(510), float(-6552), float(0.38), float(0.85))
 	
 	# Camp Alpha -5915, -6645
@@ -49,6 +52,7 @@ def addPlanetSpawns(core, planet):
 	#beltasurvivor1 = stcSvc.spawnObject('outbreak_camp_delta_survivor', 'dathomir', long(0), float(-5930), float(560), float(-6690), float(0.26), float(0.85))
 	
 	# Camp Epsilon -7463 -7392
+	hx138 = stcSvc.spawnObject('outbreak_stormtrooper_groupleader_hx138', 'dathomir', long(0), float(-7427), float(560), float(-7334), float(0.75), float(0.85))
 	
 	# Rancor Boss
 	#rancorboss1 = stcSvc.spawnObject('outbreak_afflicted_rancor', 'dathomir', long(0), float(-7155), float(560), float(-6955), float(-1.29), float(0.85))
