@@ -17,7 +17,7 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setOptionsBitmask(Options.CONVERSABLE)
-	mobileTemplate.setConversationFileName('outbreak_imperial_trooper_gate_keeper')
+	mobileTemplate.setConversationFileName('storm_trooper_leader_quarantine_zone')
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_stormtrooper.iff')
