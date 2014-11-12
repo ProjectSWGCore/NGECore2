@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, object):
-	object.setStringAttribute('required_faction', 'Rebel')
+	object.setStringAttribute('faction_restriction', 'Rebel')
 	object.setIntAttribute('required_combat_level', 75)
 	object.setStringAttribute('armor_category', '@obj_attr_n:armor_battle')
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 18)

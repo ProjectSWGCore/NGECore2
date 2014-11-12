@@ -23,7 +23,7 @@ def addPlanetSpawns(core, planet):
 
 
 	bunker = core.objectService.getObject(long(-466404037065936405))
-	if bunker not None:
+	if bunker is not None:
 		stcSvc.spawnObject('tatooine_valarian_vandal', 'tatooine', bunker.getCellByCellNumber(5), float(3.1), float(-12), float(31.9), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('tatooine_valarian_vandal', 'tatooine', bunker.getCellByCellNumber(5), float(24.9), float(-12), float(46.9), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('tatooine_valarian_vandal', 'tatooine', bunker.getCellByCellNumber(5), float(4), float(-12), float(54.6), float(0), float(0), float(0), float(0), 45)
