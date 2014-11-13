@@ -1140,9 +1140,9 @@ public class EntertainmentService implements INetworkDispatch {
 				return 6;
 			case "obj_bandfill_classic":
 				return 7;
-			case "obj_modoviol_classic":
+			case "obj_mandoviol_classic":
 				return 10;
-			case "obj_xanta_n":
+			case "xantha_n":
 				return 11;
 			case "obj_jessoon":
 				return 12;
@@ -1150,7 +1150,9 @@ public class EntertainmentService implements INetworkDispatch {
 				return 13;
 			default:
 				break;
-			}			
+				
+			}
+						
 		}
 		//TODO: The following instruments are placed and then played instead of being held.
 		//TODO: omnibox audioID is 8.
