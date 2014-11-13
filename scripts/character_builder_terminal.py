@@ -328,7 +328,7 @@ def armorHandlerCallback(owner, window, eventType, returnList):
 		marauderreconArmor(owner, inventory)
 		return
 	if returnList.get(0)=='19':
-		PaddedArmor(owner, inventory)
+		paddedArmor(owner, inventory)
 		return
 	if returnList.get(0)=='20':
 		risArmor(owner, inventory)
