@@ -7,8 +7,6 @@ from engine.resources.scene import Point3D
 
 def addPlanetSpawns(core, planet):
 	stcSvc = core.staticService
-	objSvc = core.objectService
-	aiSvc = core.aiService
 
 	# Imperial Gate Guards - Entrance + General Starting Area
 	guard1 = stcSvc.spawnObject('outbreak_imperial_stormtrooper_guards', 'dathomir', long(0), float(-5775), float(510), float(-6553), float(0.36), float(0.85))
@@ -56,4 +54,7 @@ def addPlanetSpawns(core, planet):
 	
 	# Rancor Boss
 	#rancorboss1 = stcSvc.spawnObject('outbreak_afflicted_rancor', 'dathomir', long(0), float(-7155), float(560), float(-6955), float(-1.29), float(0.85))
+	
+	# Nightsister Boss - TODO: Script Nightsister Zombie mobile
+	#nightsisterboss1 = stcSvc.spawnObject('outbreak_afflicted_rancor', 'dathomir', long(0), float(-7155), float(560), float(-6955), float(-1.29), float(0.85))
 	return	

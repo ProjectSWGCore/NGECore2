@@ -802,7 +802,7 @@ public class PlayerService implements INetworkDispatch {
 		SWGObject appearance = creature.getSlottedObject("appearance_inventory");
 		
 		if (appearance==null)
-			System.err.println("Apearance inventory is null");
+			System.err.println("Appearance inventory is null");
 		
 		if (unequipItems) {
 			try {

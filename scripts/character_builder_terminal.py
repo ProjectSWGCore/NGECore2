@@ -328,7 +328,7 @@ def armorHandlerCallback(owner, window, eventType, returnList):
 		marauderreconArmor(owner, inventory)
 		return
 	if returnList.get(0)=='19':
-		PaddedArmor(owner, inventory)
+		paddedArmor(owner, inventory)
 		return
 	if returnList.get(0)=='20':
 		risArmor(owner, inventory)
@@ -507,24 +507,44 @@ def rangedWeapons(owner, inventory):
 	return
 	
 def meleeWeapons(owner, inventory):
-	polearm = core.objectService.createObject('object/weapon/melee/polearm/shared_polearm_vibro_axe.iff', owner.getPlanet())
-	polearm.setAttackSpeed(1.0)
-	polearm.setMaxRange(5)
-	polearm.setDamageType('kinetic')
-	polearm.setMinDamage(700)
-	polearm.setMaxDamage(990)
-	polearm.setWeaponType(WeaponType.POLEARMMELEE)
 	
-	lance = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_magna_guard.iff', owner.getPlanet())
-	lance.setAttackSpeed(1.0)
-	lance.setMaxRange(5)
-	lance.setDamageType('kinetic')
-	lance.setMinDamage(700)
-	lance.setMaxDamage(990)
-	lance.setWeaponType(WeaponType.POLEARMMELEE)
+	polearm1 = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_magna_guard.iff', owner.getPlanet())
+	polearm1.setAttackSpeed(1)
+	polearm1.setMaxRange(5)
+	polearm1.setDamageType('kinetic')
+	polearm1.setMinDamage(700)
+	polearm1.setMaxDamage(990)
+	polearm1.setWeaponType(WeaponType.POLEARMMELEE)
 	
-	inventory.add(lance)
-	inventory.add(polearm)
+	twohanded1 = core.objectService.createObject('object/weapon/melee/2h_sword/shared_2h_sword_kun_massassi.iff', owner.getPlanet())
+	twohanded1.setAttackSpeed(1)
+	twohanded1.setMaxRange(5)
+	twohanded1.setDamageType('kinetic')
+	twohanded1.setMinDamage(700)
+	twohanded1.setMaxDamage(990)
+	twohanded1.setWeaponType(WeaponType.TWOHANDEDMELEE)
+	
+	onehanded1 = core.objectService.createObject('object/weapon/melee/sword/shared_sword_blade_ryyk.iff', owner.getPlanet())
+	onehanded1.setAttackSpeed(1)
+	onehanded1.setMaxRange(5)
+	onehanded1.setDamageType('kinetic')
+	onehanded1.setMinDamage(700)
+	onehanded1.setMaxDamage(990)
+	onehanded1.setWeaponType(WeaponType.ONEHANDEDMELEE)
+	
+	unarmed1 = core.objectService.createObject('object/weapon/melee/special/shared_blasterfist.iff', owner.getPlanet())
+	unarmed1.setAttackSpeed(1)
+	unarmed1.setMaxRange(5)
+	unarmed1.setDamageType('kinetic')
+	unarmed1.setMinDamage(700)
+	unarmed1.setMaxDamage(990)
+	unarmed1.setWeaponType(WeaponType.UNARMED)
+	
+	
+	inventory.add(polearm1)
+	inventory.add(twohanded1)
+	inventory.add(onehanded1)
+	inventory.add(unarmed1)
 	screenOne(core, owner)
 	return
 	
@@ -586,6 +606,7 @@ def shocktrooperArmor(owner, inventory):
 	assaulttrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	assaulttrooper_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	assaulttrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_assault_trooper_boots.iff", owner.getPlanet())
+	assaulttrooper_belt = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_assault_trooper_utility_belt.iff", owner.getPlanet())	
 	assaulttrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/assault_trooper/shared_armor_assault_trooper_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(assaulttrooper_bicep_r);
@@ -596,6 +617,7 @@ def shocktrooperArmor(owner, inventory):
 	inventory.add(assaulttrooper_helmet);
 	inventory.add(assaulttrooper_chest);
 	inventory.add(assaulttrooper_boots);
+	inventory.add(assaulttrooper_belt);
 	inventory.add(assaulttrooper_gloves);
 	screenOne(core, owner)
 	return
@@ -729,6 +751,7 @@ def bountyhunterArmor(owner, inventory):
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	bountyhunter_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);						
 	bountyhunter_boots = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_boots.iff", owner.getPlanet())
+	bountyhunter_boots = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_belt.iff", owner.getPlanet())
 	bountyhunter_gloves = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_crafted_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(bountyhunter_bicep_r);
@@ -739,6 +762,7 @@ def bountyhunterArmor(owner, inventory):
 	inventory.add(bountyhunter_helmet);
 	inventory.add(bountyhunter_chest);
 	inventory.add(bountyhunter_boots);
+	inventory.add(bountyhunter_belt);
 	inventory.add(bountyhunter_gloves);
 	screenOne(core, owner)
 	return
@@ -1163,12 +1187,12 @@ def ithoriandefenderArmor(owner, inventory):
 	
 def kashyyykianblackmountainArmor(owner, inventory):
 	kashyyykianblackmountain_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_r.iff", owner.getPlanet())
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+	kashyyykianblackmountain_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 	
 	kashyyykianblackmountain_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_l.iff", owner.getPlanet())
 	kashyyykianblackmountain_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -1202,14 +1226,6 @@ def kashyyykianblackmountainArmor(owner, inventory):
 	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	kashyyykianblackmountain_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 	
-	kashyyykianblackmountain_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_helmet.iff", owner.getPlanet())
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
-	kashyyykianblackmountain_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-	
 	kashyyykianblackmountain_chest = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_chest_plate.iff", owner.getPlanet())
 	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
 	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
@@ -1217,19 +1233,13 @@ def kashyyykianblackmountainArmor(owner, inventory):
 	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
 	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 	kashyyykianblackmountain_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
-	
-	kashyyykianblackmountain_boots = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_boots.iff", owner.getPlanet())
-	kashyyykianblackmountain_gloves = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(kashyyykianblackmountain_bicep_r);
 	inventory.add(kashyyykianblackmountain_bicep_l);
 	inventory.add(kashyyykianblackmountain_bracer_r);
 	inventory.add(kashyyykianblackmountain_bracer_l);
 	inventory.add(kashyyykianblackmountain_leggings);
-	inventory.add(kashyyykianblackmountain_helmet);
 	inventory.add(kashyyykianblackmountain_chest);
-	inventory.add(kashyyykianblackmountain_boots);
-	inventory.add(kashyyykianblackmountain_gloves);
 	screenOne(core, owner)
 	return
 	
@@ -1240,20 +1250,14 @@ def kashyyykianceremonialArmor(owner, inventory):
 	kashyyykianceremonial_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bracer_r.iff", owner.getPlanet())
 	kashyyykianceremonial_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bracer_l.iff", owner.getPlanet())
 	kashyyykianceremonial_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_leggings.iff", owner.getPlanet())
-	kashyyykianceremonial_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_helmet.iff", owner.getPlanet())
 	kashyyykianceremonial_chest = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_chest_plate.iff", owner.getPlanet())
-	kashyyykianceremonial_boots = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_boots.iff", owner.getPlanet())
-	kashyyykianceremonial_gloves = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(kashyyykianceremonial_bicep_r);
 	inventory.add(kashyyykianceremonial_bicep_l);
 	inventory.add(kashyyykianceremonial_bracer_r);
 	inventory.add(kashyyykianceremonial_bracer_l);
 	inventory.add(kashyyykianceremonial_leggings);
-	inventory.add(kashyyykianceremonial_helmet);
 	inventory.add(kashyyykianceremonial_chest);
-	inventory.add(kashyyykianceremonial_boots);
-	inventory.add(kashyyykianceremonial_gloves);
 	screenOne(core, owner)
 	return
 	
@@ -1264,20 +1268,14 @@ def kashyyykianhuntingArmor(owner, inventory):
 	kashyyykianhunting_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bracer_r.iff", owner.getPlanet())
 	kashyyykianhunting_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bracer_l.iff", owner.getPlanet())
 	kashyyykianhunting_leggings = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_leggings.iff", owner.getPlanet())
-	kashyyykianhunting_helmet = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_helmet.iff", owner.getPlanet())
 	kashyyykianhunting_chest = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_chest_plate.iff", owner.getPlanet())
-	kashyyykianhunting_boots = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_boots.iff", owner.getPlanet())
-	kashyyykianhunting_gloves = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_gloves.iff", owner.getPlanet())	
 											
 	inventory.add(kashyyykianhunting_bicep_r);
 	inventory.add(kashyyykianhunting_bicep_l);
 	inventory.add(kashyyykianhunting_bracer_r);
 	inventory.add(kashyyykianhunting_bracer_l);
 	inventory.add(kashyyykianhunting_leggings);
-	inventory.add(kashyyykianhunting_helmet);
 	inventory.add(kashyyykianhunting_chest);
-	inventory.add(kashyyykianhunting_boots);
-	inventory.add(kashyyykianhunting_gloves);
 	screenOne(core, owner)
 	return
 	
@@ -1703,7 +1701,8 @@ def snowtrooperArmor(owner, inventory):
 	snowtrooper_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_bracer_l.iff", owner.getPlanet())
 	snowtrooper_leggings = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_leggings.iff", owner.getPlanet())
 	snowtrooper_helmet = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_helmet.iff", owner.getPlanet())
-	snowtrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_chest_plate.iff", owner.getPlanet())					
+	snowtrooper_chest = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_chest_plate.iff", owner.getPlanet())
+	snowtrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_belt.iff", owner.getPlanet())					
 	snowtrooper_boots = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_boots.iff", owner.getPlanet())
 	snowtrooper_gloves = core.objectService.createObject("object/tangible/wearables/armor/snowtrooper/shared_armor_snowtrooper_gloves.iff", owner.getPlanet())	
 											
@@ -1714,6 +1713,7 @@ def snowtrooperArmor(owner, inventory):
 	inventory.add(snowtrooper_leggings);
 	inventory.add(snowtrooper_helmet);
 	inventory.add(snowtrooper_chest);
+	inventory.add(snowtrooper_belt);
 	inventory.add(snowtrooper_boots);
 	inventory.add(snowtrooper_gloves);
 	screenOne(core, owner)
@@ -1903,7 +1903,7 @@ def lightsaberColorCrystals(owner, inventory):
 	return
 	
 def jediBelt(owner, inventory):
-	# inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 	
