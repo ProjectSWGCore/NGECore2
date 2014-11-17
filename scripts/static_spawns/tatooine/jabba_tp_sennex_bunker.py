@@ -17,7 +17,7 @@ def addPlanetSpawns(core, planet):
 	
 	# TODO Check all NPCs for personalized scripting, change format.
 	bunker = core.objectService.getObject(long(-466404036409557025))
-	if bunker not None:
+	if bunker is not None:
 		stcSvc.spawnObject('sennex_guard', 'tatooine', bunker.getCellByCellNumber(2), float(-4), float(0.3), float(-0.9), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('sennex_guard', 'tatooine', bunker.getCellByCellNumber(4), float(3.7), float(-4), float(9), float(0), float(0), float(0), float(0), 45)
 		stcSvc.spawnObject('sennex_guard', 'tatooine', bunker.getCellByCellNumber(5), float(8.3), float(-12), float(26.6), float(0), float(0), float(0), float(0), 45)
