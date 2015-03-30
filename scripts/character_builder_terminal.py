@@ -369,7 +369,7 @@ def	miscHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, miscHandlerCallback)
-	window.addListBoxMenuItem('Instrument', 0)
+	window.addListBoxMenuItem('Instruments', 0)
 	window.addListBoxMenuItem('Heroism Jewelry Set', 1)	
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
 	window.addListBoxMenuItem('Starter Equipment Box', 3)
@@ -385,7 +385,7 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 		return
 		
 	if returnList.get(0)=='0':
-		instrument(owner, inventory)
+		instruments(owner, inventory)
 		return
 	if returnList.get(0)=='1':
 		heroismJewelry(owner, inventory)
@@ -1907,8 +1907,20 @@ def jediBelt(owner, inventory):
 	screenOne(core, owner)
 	return
 	
-def instrument(owner, inventory):
+def instruments(owner, inventory):
 	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_slitherhorn.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_bandfill.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_downey_box.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_fanfar.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_flanged_jessoon.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_flute_droopy.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_kloo_horn.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_mandoviol.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_nalargon.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_ommni_box.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_traz.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_valahorn.iff", owner.getPlanet()))
+	inventory.add(core.objectService.createObject("object/tangible/instrument/shared_xantha.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 

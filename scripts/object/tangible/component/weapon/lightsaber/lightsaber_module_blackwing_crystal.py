@@ -1,3 +1,4 @@
+from resources.datatables import LightsaberColors
 import sys
 
 def setup(core, object):

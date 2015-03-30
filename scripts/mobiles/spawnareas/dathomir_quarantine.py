@@ -16,6 +16,15 @@ def addSpawnArea(core):
 	core.spawnService.addDynamicSpawnArea(dynamicGroups, -5850, -6650, 525, 'dathomir')
 	
 	#dynamicGroups = Vector()
+	#dynamicGroups.add('dathomir_quarantine_lvl_10')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5700, -6500, 100, 'dathomir')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5640, -6550, 100, 'dathomir')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5850, -6400, 100, 'dathomir')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5800, -6500, 100, 'dathomir')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5600, -6525, 100, 'dathomir')
+	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5850, -6725, 530, 'dathomir')
+	
+	#dynamicGroups = Vector()
 	#dynamicGroups.add('dathomir_quarantine_lvl_15')
 	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5700, -6500, 100, 'dathomir')
 	#core.spawnService.addDynamicSpawnArea(dynamicGroups, -5640, -6550, 100, 'dathomir')

@@ -1,5 +1,5 @@
-import sys
 from resources.datatables import LightsaberColors
+import sys
 
 def setup(core, object):
 	object.setCustomizationVariable('/private/index_color_1', LightsaberColors.getByName('Windu\'s Guile'))

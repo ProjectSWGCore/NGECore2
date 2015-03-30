@@ -12,6 +12,7 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('outbreak_mixed_guard_aggro')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
+	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_outbreak_imp_trooper_guard_m_01.iff')

@@ -13,6 +13,7 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('crackdown_stormtrooper')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
+	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
